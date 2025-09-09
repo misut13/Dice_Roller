@@ -536,10 +536,8 @@
                 
                 profileCard.querySelector('.profile-delete-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (confirm(`Möchten Sie das Profil "${profile.name}" wirklich löschen?`)) {
-                        profiles = profiles.filter(p => p.id !== profile.id);
-                        renderProfiles();
-                    }
+                    profiles = profiles.filter(p => p.id !== profile.id);
+                    renderProfiles();
                 });
                 
                 profileList.appendChild(profileCard);
@@ -599,10 +597,8 @@
                     // Event Listeners
                     card.querySelector('.roll-btn').addEventListener('click', () => rollDiceFunction(index));
                     card.querySelector('.remove-btn').addEventListener('click', () => {
-                        if (confirm('Möchten Sie diese Würfelfunktion wirklich entfernen?')) {
-                            currentProfile.diceFunctions.splice(index, 1);
-                            renderProfileDetail();
-                        }
+                        currentProfile.diceFunctions.splice(index, 1);
+                        renderProfileDetail();
                     });
                     
                     diceFunctionsList.appendChild(card);
@@ -626,10 +622,8 @@
                     // Event Listeners
                     card.querySelector('.roll-btn').addEventListener('click', () => rollSimpleDice(index));
                     card.querySelector('.remove-btn').addEventListener('click', () => {
-                        if (confirm('Möchten Sie diesen Würfel wirklich entfernen?')) {
-                            currentProfile.simpleDices.splice(index, 1);
-                            renderProfileDetail();
-                        }
+                        currentProfile.simpleDices.splice(index, 1);
+                        renderProfileDetail();
                     });
                     
                     simpleDicesList.appendChild(card);
