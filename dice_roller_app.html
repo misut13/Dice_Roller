@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P&P Dice Roller</title>
+    <title>DiceForge</title>
     <style>
         * {
             margin: 0;
@@ -30,7 +30,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #4a5568, #2d3748);
+            background: rgb(84, 49, 24);
             color: white;
             padding: 20px;
             text-align: center;
@@ -330,7 +330,7 @@
         <div class="header">
             <button class="back-btn" id="backBtn" style="display: none;">↩</button>
             <button class="settings-btn" id="settingsBtn" style="display: none;">⚙️</button>
-            <h1 id="headerTitle">P&P Dice Roller</h1>
+            <h1 id="headerTitle">DiceForge</h1>
             <div class="subtitle" id="headerSubtitle"></div>
         </div>
 
@@ -481,7 +481,7 @@
 
         function showProfileList() {
             showScreen('profileListScreen');
-            document.getElementById('headerTitle').textContent = 'P&P Dice Roller';
+            document.getElementById('headerTitle').textContent = 'DiceForge';
             document.getElementById('headerSubtitle').textContent = '';
             renderProfiles();
         }
