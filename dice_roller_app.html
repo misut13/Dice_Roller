@@ -403,6 +403,8 @@
         let lastRoll = null;
         let deleteMode = false;
 
+        const standardDiceSides = [3, 4, 6, 8, 10, 12, 20, 100];
+
         // Initialize with demo data
         function initializeApp() {
             profiles = [
@@ -558,7 +560,7 @@
                 id: generateId(),
                 name: name,
                 diceFunctions: [],
-                simpleDices: []
+                simpleDices: standardDiceSides.map(sides => ({ sides }))
             };
 
             profiles.push(profile);
