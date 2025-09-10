@@ -329,7 +329,7 @@
             <h2>Neues Profil erstellen</h2>
             <div class="input-group">
                 <label for="profileName">Profilname:</label>
-                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="16">
+                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="20">
             </div>
             <button class="btn" id="createProfileBtn">Profil erstellen</button>
             <button class="btn btn-secondary" id="cancelCreateProfileBtn">Abbrechen</button>
@@ -351,7 +351,7 @@
                     <div class="settings-panel">
                         <button class="btn" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
                         <button class="btn" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
-                        <button class="btn btn-danger" id="deleteModeBtn">Löschmodus</button>
+                        <button class="btn btn-danger" id="deleteModeBtn">Löschen</button>
                     </div>
                 </div>
             </div>
@@ -365,7 +365,7 @@
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
-                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3 oder 3d6+3" maxlength="15">
+                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3" maxlength="15">
                 <small>Format: Kombinationen wie 3w6+3 oder 3w6+3+2w6-2</small>
             </div>
             <button class="btn" id="saveDiceFunctionBtn">Hinzufügen</button>
@@ -402,6 +402,8 @@
         let currentProfile = null;
         let lastRoll = null;
         let deleteMode = false;
+
+        const standardDiceSides = [3, 4, 6, 8, 10, 12, 20, 100];
 
         // Initialize with demo data
         function initializeApp() {
@@ -549,8 +551,8 @@
                 alert('Bitte geben Sie einen Profilnamen ein.');
                 return;
             }
-            if (name.length > 16) {
-                alert('Profilname darf maximal 16 Zeichen lang sein.');
+            if (name.length > 20) {
+                alert('Profilname darf maximal 20 Zeichen lang sein.');
                 return;
             }
 
@@ -558,7 +560,7 @@
                 id: generateId(),
                 name: name,
                 diceFunctions: [],
-                simpleDices: []
+                simpleDices: standardDiceSides.map(sides => ({ sides }))
             };
 
             profiles.push(profile);
@@ -799,7 +801,6 @@
         function enableDeleteMode() {
             deleteMode = true;
             closeSettings();
-            alert('Wähle eine Funktion zum Löschen');
         }
 
         // Initialize Event Listeners
