@@ -54,6 +54,10 @@
             overflow-y: auto;
         }
 
+        #profileDetailScreen {
+            padding-bottom: 60px;
+        }
+
         .screen.active {
             display: block;
         }
@@ -145,8 +149,8 @@
         }
 
         .btn-small {
-            padding: 8px 16px;
-            font-size: 14px;
+            padding: 6px 12px;
+            font-size: 12px;
             width: auto;
             margin: 0 4px 8px 0;
         }
@@ -179,8 +183,8 @@
         .dice-function-card, .simple-dice-card {
             background: #f7fafc;
             border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: 8px;
+            margin-bottom: 8px;
             border: 1px solid #e2e8f0;
             position: relative;
         }
@@ -207,6 +211,7 @@
         }
 
         .dice-function-name {
+            font-size: 16px;
             font-weight: bold;
             color: #2d3748;
             margin-bottom: 4px;
@@ -215,8 +220,8 @@
         .dice-function-formula {
             font-family: 'Courier New', monospace;
             color: #667eea;
-            font-size: 14px;
-            margin-bottom: 8px;
+            font-size: 12px;
+            margin-bottom: 6px;
         }
 
         .dice-result {
@@ -225,7 +230,7 @@
             padding: 16px;
             border-radius: 8px;
             text-align: center;
-            font-size: 24px;
+            font-size: 32px;
             font-weight: bold;
             margin: 12px 0;
             animation: rollIn 0.5s ease-out;
@@ -307,35 +312,21 @@
             opacity: 0.5;
         }
 
-        .dice-history {
-            background: #f7fafc;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 16px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
+        /* Last roll bar */
+        .last-roll-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #faf089;
+            border-top: 1px solid #e2e8f0;
+            padding: 8px;
+            text-align: center;
             font-size: 14px;
         }
 
-        .history-item:last-child {
-            border-bottom: none;
-        }
-
-        .history-item.latest {
-            background: #faf089;
-        }
-
-        .roll-details {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 4px;
+        .last-roll-bar strong {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -343,10 +334,10 @@
     <div class="app-container">
         <!-- Header -->
         <div class="header">
-            <button class="back-btn" id="backBtn" style="display: none;">← Zurück</button>
+            <button class="back-btn" id="backBtn" style="display: none;">↩</button>
             <button class="settings-btn" id="settingsBtn" style="display: none;">⚙️</button>
             <h1 id="headerTitle">P&P Dice Roller</h1>
-            <div class="subtitle" id="headerSubtitle">Würfel-App für Pen & Paper</div>
+            <div class="subtitle" id="headerSubtitle"></div>
         </div>
 
         <!-- Profile List Screen -->
@@ -382,10 +373,6 @@
                 <div id="simpleDices">
                     <h3>Einfache Würfel</h3>
                     <div id="simpleDicesList"></div>
-                </div>
-
-                <div class="dice-history" id="diceHistory" style="display: none;">
-                    <div id="historyList"></div>
                 </div>
             </div>
 
@@ -434,13 +421,14 @@
             <button class="btn" id="saveSimpleDiceBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelSimpleDiceBtn">Abbrechen</button>
         </div>
+        <div id="lastRollBar" class="last-roll-bar" style="display:none;"></div>
     </div>
 
     <script>
         // Global State
         let profiles = [];
         let currentProfile = null;
-        let rollHistory = [];
+        let lastRoll = null;
 
         // Initialize with demo data
         function initializeApp() {
@@ -491,12 +479,13 @@
                 backBtn.style.display = 'block';
                 settingsBtn.style.display = 'none';
             }
+            updateLastRollBar();
         }
 
         function showProfileList() {
             showScreen('profileListScreen');
             document.getElementById('headerTitle').textContent = 'P&P Dice Roller';
-            document.getElementById('headerSubtitle').textContent = 'Würfel-App für Pen & Paper';
+            document.getElementById('headerSubtitle').textContent = '';
             renderProfiles();
         }
 
@@ -604,7 +593,7 @@
 
         function openProfile(profileId) {
             currentProfile = profiles.find(p => p.id === profileId);
-            rollHistory = [];
+            lastRoll = null;
             showProfileDetail();
         }
 
@@ -612,8 +601,6 @@
         function renderProfileDetail() {
             const diceFunctionsList = document.getElementById('diceFunctionsList');
             const simpleDicesList = document.getElementById('simpleDicesList');
-            const historyEl = document.getElementById('diceHistory');
-            const historyList = document.getElementById('historyList');
 
             // Clear previous content
             diceFunctionsList.innerHTML = '';
@@ -672,24 +659,17 @@
                 });
             }
 
-            // Historie (ohne Überschrift)
-            if (rollHistory.length > 0) {
-                historyEl.style.display = 'block';
-                historyList.innerHTML = '';
-                rollHistory.slice(-10).reverse().forEach((roll, idx) => {
-                    const item = document.createElement('div');
-                    item.className = 'history-item' + (idx === 0 ? ' latest' : '');
-                    item.innerHTML = `
-                        <div>
-                            <strong>${escapeHtml(roll.name)}</strong>
-                            <div class="roll-details">${escapeHtml(roll.details)}</div>
-                        </div>
-                        <div><strong>${roll.result}</strong></div>
-                    `;
-                    historyList.appendChild(item);
-                });
+            updateLastRollBar();
+        }
+
+        function updateLastRollBar() {
+            const bar = document.getElementById('lastRollBar');
+            const active = document.querySelector('.screen.active').id;
+            if (active === 'profileDetailScreen' && lastRoll) {
+                bar.style.display = 'block';
+                bar.innerHTML = `<strong>${escapeHtml(lastRoll.name)}</strong>: ${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong>`;
             } else {
-                historyEl.style.display = 'none';
+                bar.style.display = 'none';
             }
         }
 
@@ -806,13 +786,12 @@
                 resultEl.innerHTML = `<div class="dice-result">${total}</div>`;
             }
 
-            rollHistory.push({
+            lastRoll = {
                 name: func.name,
                 details: detailParts.join(' '),
                 result: total
-            });
-
-            renderProfileDetail();
+            };
+            updateLastRollBar();
         }
 
         function rollSimpleDice(index) {
@@ -824,14 +803,12 @@
                 resultEl.innerHTML = `<div class="dice-result">${result}</div>`;
             }
 
-            // Zur Historie hinzufügen
-            rollHistory.push({
+            lastRoll = {
                 name: `W${dice.sides}`,
                 details: `1w${dice.sides}`,
                 result: result
-            });
-
-            renderProfileDetail();
+            };
+            updateLastRollBar();
         }
 
         // Settings
