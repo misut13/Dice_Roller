@@ -145,10 +145,10 @@
         }
 
         .btn-small {
-            padding: 8px 16px;
-            font-size: 14px;
+            padding: 6px 12px;
+            font-size: 13px;
             width: auto;
-            margin: 0 4px 8px 0;
+            margin: 0 4px 6px 0;
         }
 
         .input-group {
@@ -179,22 +179,44 @@
         .dice-function-card, .simple-dice-card {
             background: #f7fafc;
             border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: 8px;
+            margin-bottom: 8px;
             border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .card-delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .card-delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
         }
 
         .dice-function-name {
             font-weight: bold;
             color: #2d3748;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .dice-function-formula {
             font-family: 'Courier New', monospace;
             color: #667eea;
-            font-size: 14px;
-            margin-bottom: 8px;
+            font-size: 12px;
+            margin-bottom: 4px;
         }
 
         .dice-result {
@@ -290,13 +312,15 @@
             border-radius: 8px;
             padding: 12px;
             margin-top: 16px;
-            max-height: 200px;
-            overflow-y: auto;
+            border-top: 1px solid #e2e8f0;
+            position: sticky;
+            bottom: 0;
         }
 
         .history-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 8px 0;
             border-bottom: 1px solid #e2e8f0;
             font-size: 14px;
@@ -306,11 +330,25 @@
             border-bottom: none;
         }
 
+        .history-item.latest {
+            background: #faf089;
+        }
+
+        .history-result {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
         .roll-details {
             font-size: 12px;
             color: #718096;
             margin-top: 4px;
         }
+
+        #profileContent {
+            padding-bottom: 80px;
+        }
+
     </style>
 </head>
 <body>
@@ -340,7 +378,7 @@
             <h2>Neues Profil erstellen</h2>
             <div class="input-group">
                 <label for="profileName">Profilname:</label>
-                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue">
+                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="16">
             </div>
             <button class="btn" id="createProfileBtn">Profil erstellen</button>
             <button class="btn btn-secondary" id="cancelCreateProfileBtn">Abbrechen</button>
@@ -376,11 +414,11 @@
             <h2>Würfelfunktion hinzufügen</h2>
             <div class="input-group">
                 <label for="functionName">Name:</label>
-                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden">
+                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="38">
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
-                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3 oder 3d6+3">
+                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3 oder 3d6+3" maxlength="20">
                 <small>Format: Kombinationen wie 3w6+3 oder 3w6+3+2w6-2</small>
             </div>
             <button class="btn" id="saveDiceFunctionBtn">Hinzufügen</button>
@@ -421,7 +459,7 @@
             profiles = [
                 {
                     id: '1',
-                    name: 'Beispiel Charakter',
+                    name: 'Beispiel Held',
                     diceFunctions: [
                         { name: 'Schwert Angriff', formula: '1w20+5' },
                         { name: 'Feuerball', formula: '3d6+2' }
@@ -560,6 +598,10 @@
                 alert('Bitte geben Sie einen Profilnamen ein.');
                 return;
             }
+            if (name.length > 16) {
+                alert('Profilname darf maximal 16 Zeichen lang sein.');
+                return;
+            }
 
             const profile = {
                 id: generateId(),
@@ -597,16 +639,17 @@
                     const card = document.createElement('div');
                     card.className = 'dice-function-card';
                     card.innerHTML = `
+                        <button class="card-delete-btn" title="Funktion entfernen">×</button>
                         <div class="dice-function-name">${escapeHtml(func.name)}</div>
                         <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
                         <button class="btn btn-small roll-btn">Würfeln</button>
-                        <button class="btn btn-small btn-danger remove-btn">Entfernen</button>
                         <div id="result-${index}"></div>
                     `;
-                    
+
                     // Event Listeners
                     card.querySelector('.roll-btn').addEventListener('click', () => rollDiceFunction(index));
-                    card.querySelector('.remove-btn').addEventListener('click', () => {
+                    card.querySelector('.card-delete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
                         currentProfile.diceFunctions.splice(index, 1);
                         renderProfileDetail();
                     });
@@ -623,15 +666,16 @@
                     const card = document.createElement('div');
                     card.className = 'simple-dice-card';
                     card.innerHTML = `
+                        <button class="card-delete-btn" title="Würfel entfernen">×</button>
                         <div class="dice-function-name">W${dice.sides}</div>
                         <button class="btn btn-small roll-btn">Würfeln</button>
-                        <button class="btn btn-small btn-danger remove-btn">Entfernen</button>
                         <div id="simple-result-${index}"></div>
                     `;
-                    
+
                     // Event Listeners
                     card.querySelector('.roll-btn').addEventListener('click', () => rollSimpleDice(index));
-                    card.querySelector('.remove-btn').addEventListener('click', () => {
+                    card.querySelector('.card-delete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
                         currentProfile.simpleDices.splice(index, 1);
                         renderProfileDetail();
                     });
@@ -640,22 +684,21 @@
                 });
             }
 
-            // Historie (ohne Überschrift)
+            // Historie (nur letzter Eintrag)
             if (rollHistory.length > 0) {
                 historyEl.style.display = 'block';
                 historyList.innerHTML = '';
-                rollHistory.slice(-10).reverse().forEach(roll => {
-                    const item = document.createElement('div');
-                    item.className = 'history-item';
-                    item.innerHTML = `
-                        <div>
-                            <strong>${escapeHtml(roll.name)}</strong>
-                            <div class="roll-details">${escapeHtml(roll.details)}</div>
-                        </div>
-                        <div><strong>${roll.result}</strong></div>
-                    `;
-                    historyList.appendChild(item);
-                });
+                const roll = rollHistory[rollHistory.length - 1];
+                const item = document.createElement('div');
+                item.className = 'history-item latest';
+                item.innerHTML = `
+                    <div>
+                        <strong>${escapeHtml(roll.name)}</strong>
+                        <div class="roll-details">${escapeHtml(roll.details)}</div>
+                    </div>
+                    <div class="history-result">${roll.result}</div>
+                `;
+                historyList.appendChild(item);
             } else {
                 historyEl.style.display = 'none';
             }
@@ -668,6 +711,14 @@
 
             if (!name || !formula) {
                 alert('Bitte füllen Sie alle Felder aus.');
+                return;
+            }
+            if (name.length > 38) {
+                alert('Der Name der Würfelfunktion darf maximal 38 Zeichen lang sein.');
+                return;
+            }
+            if (formula.length > 20) {
+                alert('Die Würfelformel darf maximal 20 Zeichen lang sein.');
                 return;
             }
 
@@ -766,11 +817,11 @@
                 resultEl.innerHTML = `<div class="dice-result">${total}</div>`;
             }
 
-            rollHistory.push({
+            rollHistory = [{
                 name: func.name,
                 details: detailParts.join(' '),
                 result: total
-            });
+            }];
 
             renderProfileDetail();
         }
@@ -785,11 +836,11 @@
             }
 
             // Zur Historie hinzufügen
-            rollHistory.push({
+            rollHistory = [{
                 name: `W${dice.sides}`,
                 details: `1w${dice.sides}`,
                 result: result
-            });
+            }];
 
             renderProfileDetail();
         }
