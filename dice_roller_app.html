@@ -52,6 +52,7 @@
             padding: 20px;
             flex: 1;
             overflow-y: auto;
+            position: relative;
         }
 
         #profileDetailScreen {
@@ -328,7 +329,6 @@
         <!-- Header -->
         <div class="header">
             <button class="back-btn" id="backBtn" style="display: none;">↩</button>
-            <button class="settings-btn" id="settingsBtn">⚙️</button>
             <h1 id="headerTitle">P&P Dice Roller</h1>
             <div class="subtitle" id="headerSubtitle"></div>
         </div>
@@ -362,20 +362,22 @@
                 <div id="diceFunctions">
                     <div id="diceFunctionsList"></div>
                 </div>
-                
+
                 <div id="simpleDices">
                     <div id="simpleDicesList"></div>
                 </div>
             </div>
 
-                <div id="settingsOverlay" class="settings-overlay">
-                    <div class="settings-panel">
-                        <button class="btn btn-wood" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
-                        <button class="btn btn-wood" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
-                        <button class="btn btn-danger" id="deleteModeBtn">Löschen</button>
-                    </div>
+            <button class="settings-btn" id="settingsBtn">⚙️</button>
+
+            <div id="settingsOverlay" class="settings-overlay">
+                <div class="settings-panel">
+                    <button class="btn btn-wood" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
+                    <button class="btn btn-wood" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
+                    <button class="btn btn-danger" id="deleteModeBtn">Löschen</button>
                 </div>
             </div>
+        </div>
 
         <!-- Add Dice Function Screen -->
         <div class="screen" id="addDiceFunctionScreen">
