@@ -55,7 +55,7 @@
         }
 
         #profileDetailScreen {
-            padding-bottom: 60px;
+            padding-bottom: 80px;
         }
 
         .screen.active {
@@ -224,29 +224,6 @@
             margin-bottom: 6px;
         }
 
-        .dice-result {
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            color: white;
-            padding: 16px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 32px;
-            font-weight: bold;
-            margin: 12px 0;
-            animation: rollIn 0.5s ease-out;
-        }
-
-        @keyframes rollIn {
-            0% {
-                transform: scale(0.5) rotate(180deg);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1) rotate(0deg);
-                opacity: 1;
-            }
-        }
-
         .back-btn, .settings-btn {
             position: absolute;
             top: 20px;
@@ -323,6 +300,11 @@
             padding: 8px;
             text-align: center;
             font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .last-roll-bar .line {
+            white-space: nowrap;
         }
 
         .last-roll-bar strong {
@@ -618,7 +600,6 @@
                         <div class="dice-function-name">${escapeHtml(func.name)}</div>
                         <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
                         <button class="btn btn-small roll-btn">Würfeln</button>
-                        <div id="result-${index}"></div>
                     `;
 
                     // Event Listeners
@@ -644,7 +625,6 @@
                         <button class="card-delete-btn" title="Würfel entfernen">×</button>
                         <div class="dice-function-name">W${dice.sides}</div>
                         <button class="btn btn-small roll-btn">Würfeln</button>
-                        <div id="simple-result-${index}"></div>
                     `;
 
                     // Event Listeners
@@ -667,7 +647,9 @@
             const active = document.querySelector('.screen.active').id;
             if (active === 'profileDetailScreen' && lastRoll) {
                 bar.style.display = 'block';
-                bar.innerHTML = `<strong>${escapeHtml(lastRoll.name)}</strong>: ${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong>`;
+                bar.innerHTML =
+                    `<div class="line"><strong>${escapeHtml(lastRoll.name)}</strong></div>` +
+                    `<div class="line">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></div>`;
             } else {
                 bar.style.display = 'none';
             }
@@ -781,11 +763,6 @@
                 }
             });
 
-            const resultEl = document.getElementById(`result-${index}`);
-            if (resultEl) {
-                resultEl.innerHTML = `<div class="dice-result">${total}</div>`;
-            }
-
             lastRoll = {
                 name: func.name,
                 details: detailParts.join(' '),
@@ -797,11 +774,6 @@
         function rollSimpleDice(index) {
             const dice = currentProfile.simpleDices[index];
             const result = rollDice(dice.sides);
-
-            const resultEl = document.getElementById(`simple-result-${index}`);
-            if (resultEl) {
-                resultEl.innerHTML = `<div class="dice-result">${result}</div>`;
-            }
 
             lastRoll = {
                 name: `W${dice.sides}`,
