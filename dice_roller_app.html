@@ -55,7 +55,7 @@
         }
 
         #profileDetailScreen {
-            padding-bottom: 60px;
+            padding-bottom: 100px;
         }
 
         .screen.active {
@@ -299,11 +299,18 @@
             border-top: 1px solid #e2e8f0;
             padding: 8px;
             text-align: center;
-            font-size: 28px;
+            font-size: 16px;
+            line-height: 1.4;
         }
 
-        .last-roll-bar strong {
+        .last-roll-bar .roll-name {
             font-weight: bold;
+            display: block;
+        }
+
+        .last-roll-bar .roll-result {
+            display: block;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -642,7 +649,7 @@
             const active = document.querySelector('.screen.active').id;
             if (active === 'profileDetailScreen' && lastRoll) {
                 bar.style.display = 'block';
-                bar.innerHTML = `<strong>${escapeHtml(lastRoll.name)}</strong>: ${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong>`;
+                bar.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></span>`;
             } else {
                 bar.style.display = 'none';
             }
