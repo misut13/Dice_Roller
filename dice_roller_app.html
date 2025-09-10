@@ -329,7 +329,7 @@
             <h2>Neues Profil erstellen</h2>
             <div class="input-group">
                 <label for="profileName">Profilname:</label>
-                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="16">
+                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="20">
             </div>
             <button class="btn" id="createProfileBtn">Profil erstellen</button>
             <button class="btn btn-secondary" id="cancelCreateProfileBtn">Abbrechen</button>
@@ -549,8 +549,8 @@
                 alert('Bitte geben Sie einen Profilnamen ein.');
                 return;
             }
-            if (name.length > 16) {
-                alert('Profilname darf maximal 16 Zeichen lang sein.');
+            if (name.length > 20) {
+                alert('Profilname darf maximal 20 Zeichen lang sein.');
                 return;
             }
 
