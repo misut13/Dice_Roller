@@ -21,10 +21,12 @@
         .app-container {
             max-width: 400px;
             margin: 0 auto;
-            min-height: 100vh;
+            height: 100vh;
             background: white;
             position: relative;
-            overflow-x: hidden;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
@@ -48,7 +50,8 @@
         .screen {
             display: none;
             padding: 20px;
-            min-height: calc(100vh - 80px);
+            flex: 1;
+            overflow-y: auto;
         }
 
         .screen.active {
@@ -57,6 +60,8 @@
 
         .profile-list {
             margin-bottom: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
         }
 
         .profile-card {
@@ -108,6 +113,27 @@
         }
 
         .profile-delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .card-delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .card-delete-btn:hover {
             opacity: 1;
             transform: scale(1.1);
         }
@@ -177,6 +203,7 @@
             padding: 12px;
             margin-bottom: 12px;
             border: 1px solid #e2e8f0;
+            position: relative;
         }
 
         .dice-function-name {
@@ -301,6 +328,11 @@
             border-bottom: none;
         }
 
+        .history-item.latest-roll {
+            background: #edf2f7;
+            border-radius: 4px;
+        }
+
         .roll-details {
             font-size: 12px;
             color: #718096;
@@ -335,7 +367,7 @@
             <h2>Neues Profil erstellen</h2>
             <div class="input-group">
                 <label for="profileName">Profilname:</label>
-                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue">
+                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="16">
             </div>
             <button class="btn" id="createProfileBtn">Profil erstellen</button>
             <button class="btn btn-secondary" id="cancelCreateProfileBtn">Abbrechen</button>
@@ -371,12 +403,12 @@
             <h2>Würfelfunktion hinzufügen</h2>
             <div class="input-group">
                 <label for="functionName">Name:</label>
-                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden">
+                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="38">
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
-                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3 oder 3d6+3">
-                <small>Format: XwY+Z oder XdY+Z (X Würfel mit Y Seiten + Z Bonus)</small>
+                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3 oder 3d6+3" maxlength="20">
+                <small>Format: Kombinationen wie 3w6+3 oder 3w6+3+2w6-2</small>
             </div>
             <button class="btn" id="saveDiceFunctionBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelDiceFunctionBtn">Abbrechen</button>
@@ -396,7 +428,9 @@
                     <option value="12">W12</option>
                     <option value="20">W20</option>
                     <option value="100">W100</option>
+                    <option value="custom">Individueller Würfel</option>
                 </select>
+                <input type="number" id="customDiceSides" placeholder="Seitenanzahl" style="display:none;" min="1">
             </div>
             <button class="btn" id="saveSimpleDiceBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelSimpleDiceBtn">Abbrechen</button>
@@ -414,7 +448,7 @@
             profiles = [
                 {
                     id: '1',
-                    name: 'Beispiel Charakter',
+                    name: 'Beispiel Char',
                     diceFunctions: [
                         { name: 'Schwert Angriff', formula: '1w20+5' },
                         { name: 'Feuerball', formula: '3d6+2' }
@@ -497,6 +531,9 @@
             showScreen('addSimpleDiceScreen');
             document.getElementById('headerTitle').textContent = 'Einfacher Würfel';
             document.getElementById('headerSubtitle').textContent = 'Neuen Würfel hinzufügen';
+            document.getElementById('diceType').value = '6';
+            document.getElementById('customDiceSides').value = '';
+            document.getElementById('customDiceSides').style.display = 'none';
         }
 
         // Profile Management
@@ -536,10 +573,8 @@
                 
                 profileCard.querySelector('.profile-delete-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (confirm(`Möchten Sie das Profil "${profile.name}" wirklich löschen?`)) {
-                        profiles = profiles.filter(p => p.id !== profile.id);
-                        renderProfiles();
-                    }
+                    profiles = profiles.filter(p => p.id !== profile.id);
+                    renderProfiles();
                 });
                 
                 profileList.appendChild(profileCard);
@@ -550,6 +585,10 @@
             const name = document.getElementById('profileName').value.trim();
             if (!name) {
                 alert('Bitte geben Sie einen Profilnamen ein.');
+                return;
+            }
+            if (name.length > 16) {
+                alert('Der Profilname darf maximal 16 Zeichen lang sein.');
                 return;
             }
 
@@ -589,22 +628,20 @@
                     const card = document.createElement('div');
                     card.className = 'dice-function-card';
                     card.innerHTML = `
+                        <button class="card-delete-btn" title="Entfernen">×</button>
                         <div class="dice-function-name">${escapeHtml(func.name)}</div>
                         <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
                         <button class="btn btn-small roll-btn">Würfeln</button>
-                        <button class="btn btn-small btn-danger remove-btn">Entfernen</button>
                         <div id="result-${index}"></div>
                     `;
-                    
+
                     // Event Listeners
                     card.querySelector('.roll-btn').addEventListener('click', () => rollDiceFunction(index));
-                    card.querySelector('.remove-btn').addEventListener('click', () => {
-                        if (confirm('Möchten Sie diese Würfelfunktion wirklich entfernen?')) {
-                            currentProfile.diceFunctions.splice(index, 1);
-                            renderProfileDetail();
-                        }
+                    card.querySelector('.card-delete-btn').addEventListener('click', () => {
+                        currentProfile.diceFunctions.splice(index, 1);
+                        renderProfileDetail();
                     });
-                    
+
                     diceFunctionsList.appendChild(card);
                 });
             }
@@ -617,21 +654,19 @@
                     const card = document.createElement('div');
                     card.className = 'simple-dice-card';
                     card.innerHTML = `
+                        <button class="card-delete-btn" title="Entfernen">×</button>
                         <div class="dice-function-name">W${dice.sides}</div>
                         <button class="btn btn-small roll-btn">Würfeln</button>
-                        <button class="btn btn-small btn-danger remove-btn">Entfernen</button>
                         <div id="simple-result-${index}"></div>
                     `;
-                    
+
                     // Event Listeners
                     card.querySelector('.roll-btn').addEventListener('click', () => rollSimpleDice(index));
-                    card.querySelector('.remove-btn').addEventListener('click', () => {
-                        if (confirm('Möchten Sie diesen Würfel wirklich entfernen?')) {
-                            currentProfile.simpleDices.splice(index, 1);
-                            renderProfileDetail();
-                        }
+                    card.querySelector('.card-delete-btn').addEventListener('click', () => {
+                        currentProfile.simpleDices.splice(index, 1);
+                        renderProfileDetail();
                     });
-                    
+
                     simpleDicesList.appendChild(card);
                 });
             }
@@ -640,9 +675,9 @@
             if (rollHistory.length > 0) {
                 historyEl.style.display = 'block';
                 historyList.innerHTML = '';
-                rollHistory.slice(-10).reverse().forEach(roll => {
+                rollHistory.slice(-10).reverse().forEach((roll, i) => {
                     const item = document.createElement('div');
-                    item.className = 'history-item';
+                    item.className = 'history-item' + (i === 0 ? ' latest-roll' : '');
                     item.innerHTML = `
                         <div>
                             <strong>${escapeHtml(roll.name)}</strong>
@@ -667,8 +702,18 @@
                 return;
             }
 
+            if (name.length > 38) {
+                alert('Der Funktionsname darf maximal 38 Zeichen lang sein.');
+                return;
+            }
+
+            if (formula.length > 20) {
+                alert('Die Formel darf maximal 20 Zeichen lang sein.');
+                return;
+            }
+
             if (!isValidFormula(formula)) {
-                alert('Ungültige Formel. Verwenden Sie das Format: XwY+Z oder XdY+Z (z.B. 3w6+3 oder 3d6+3)');
+                alert('Ungültige Formel. Beispiele: 3w6+3 oder 3w6+3+2w6-2');
                 return;
             }
 
@@ -678,25 +723,50 @@
 
         // Simple Dice
         function addSimpleDice() {
-            const sides = parseInt(document.getElementById('diceType').value);
+            const type = document.getElementById('diceType').value;
+            let sides;
+            if (type === 'custom') {
+                sides = parseInt(document.getElementById('customDiceSides').value, 10);
+            } else {
+                sides = parseInt(type, 10);
+            }
+            if (!sides || sides < 1) {
+                alert('Bitte geben Sie eine gültige Seitenanzahl ein');
+                return;
+            }
             currentProfile.simpleDices.push({ sides });
             showProfileDetail();
         }
 
         // Dice Rolling
         function isValidFormula(formula) {
-            return /^\d+[wWdD]\d+(\+\d+)?$/.test(formula.replace(/\s/g, ''));
+            return parseFormula(formula) !== null;
         }
 
         function parseFormula(formula) {
-            const match = formula.replace(/\s/g, '').match(/^(\d+)[wWdD](\d+)(\+(\d+))?$/);
-            if (!match) return null;
-            
-            return {
-                count: parseInt(match[1]),
-                sides: parseInt(match[2]),
-                bonus: parseInt(match[4] || 0)
-            };
+            if (!formula) return null;
+            const clean = formula.replace(/\s+/g, '').replace(/-/g, '+-');
+            const tokens = clean.split('+').filter(t => t);
+            const terms = [];
+
+            for (let token of tokens) {
+                let sign = 1;
+                if (token.startsWith('-')) {
+                    sign = -1;
+                    token = token.slice(1);
+                }
+                const diceMatch = token.match(/^(\d*)[wWdD](\d+)$/);
+                if (diceMatch) {
+                    const count = parseInt(diceMatch[1] || '1', 10);
+                    const sides = parseInt(diceMatch[2], 10);
+                    terms.push({ type: 'dice', count, sides, sign });
+                } else if (/^\d+$/.test(token)) {
+                    terms.push({ type: 'number', value: sign * parseInt(token, 10) });
+                } else {
+                    return null;
+                }
+            }
+            return terms;
         }
 
         function rollDice(sides) {
@@ -705,31 +775,41 @@
 
         function rollDiceFunction(index) {
             const func = currentProfile.diceFunctions[index];
-            const parsed = parseFormula(func.formula);
-            
-            if (!parsed) {
+            const terms = parseFormula(func.formula);
+
+            if (!terms) {
                 alert('Fehlerhafte Formel');
                 return;
             }
 
-            const rolls = [];
-            for (let i = 0; i < parsed.count; i++) {
-                rolls.push(rollDice(parsed.sides));
-            }
+            let total = 0;
+            const detailParts = [];
 
-            const sum = rolls.reduce((a, b) => a + b, 0);
-            const total = sum + parsed.bonus;
+            terms.forEach((term, i) => {
+                if (term.type === 'dice') {
+                    const rolls = [];
+                    for (let r = 0; r < term.count; r++) {
+                        rolls.push(rollDice(term.sides));
+                    }
+                    const sum = rolls.reduce((a, b) => a + b, 0) * term.sign;
+                    total += sum;
+                    const sign = term.sign < 0 ? '-' : (detailParts.length ? '+' : '');
+                    detailParts.push(`${sign}${term.count}w${term.sides} [${rolls.join(', ')}]`);
+                } else {
+                    total += term.value;
+                    const sign = term.value < 0 ? '-' : (detailParts.length ? '+' : '');
+                    detailParts.push(`${sign}${Math.abs(term.value)}`);
+                }
+            });
 
             const resultEl = document.getElementById(`result-${index}`);
             if (resultEl) {
                 resultEl.innerHTML = `<div class="dice-result">${total}</div>`;
             }
 
-            // Zur Historie hinzufügen
-            const separator = func.formula.match(/[wWdD]/)[0];
             rollHistory.push({
                 name: func.name,
-                details: `${parsed.count}${separator}${parsed.sides}${parsed.bonus > 0 ? '+' + parsed.bonus : ''} → [${rolls.join(', ')}]${parsed.bonus > 0 ? ' + ' + parsed.bonus : ''}`,
+                details: detailParts.join(' '),
                 result: total
             });
 
@@ -815,6 +895,14 @@
             // Simple dice creation
             document.getElementById('saveSimpleDiceBtn').addEventListener('click', addSimpleDice);
             document.getElementById('cancelSimpleDiceBtn').addEventListener('click', showProfileDetail);
+            document.getElementById('diceType').addEventListener('change', (e) => {
+                const custom = document.getElementById('customDiceSides');
+                if (e.target.value === 'custom') {
+                    custom.style.display = 'block';
+                } else {
+                    custom.style.display = 'none';
+                }
+            });
         }
 
         // Initialize App
