@@ -351,7 +351,7 @@
                     <div class="settings-panel">
                         <button class="btn" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
                         <button class="btn" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
-                        <button class="btn btn-danger" id="deleteModeBtn">Löschmodus</button>
+                        <button class="btn btn-danger" id="deleteModeBtn">Löschen</button>
                     </div>
                 </div>
             </div>
@@ -365,7 +365,7 @@
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
-                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3 oder 3d6+3" maxlength="15">
+                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3" maxlength="15">
                 <small>Format: Kombinationen wie 3w6+3 oder 3w6+3+2w6-2</small>
             </div>
             <button class="btn" id="saveDiceFunctionBtn">Hinzufügen</button>
@@ -799,7 +799,6 @@
         function enableDeleteMode() {
             deleteMode = true;
             closeSettings();
-            alert('Wähle eine Funktion zum Löschen');
         }
 
         // Initialize Event Listeners
