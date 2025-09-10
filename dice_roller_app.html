@@ -72,7 +72,7 @@
             background: url('Button1.png') no-repeat center;
             background-size: 100% 100%;
             border-radius: 8px;
-            padding: 16px;
+            padding: 16px 16px 16px 8px;
             margin-bottom: 12px;
             box-shadow: none;
             border: none;
@@ -160,6 +160,10 @@
             background: url('Button3.png') no-repeat center;
             background-size: 100% 100%;
             color: black;
+        }
+
+        #createNewProfileBtn {
+            font-weight: bold;
         }
 
         .input-group {
@@ -540,7 +544,7 @@
                     <button class="profile-delete-btn" title="Profil löschen">×</button>
                     <div class="profile-name">${escapeHtml(profile.name)}</div>
                     <div class="profile-stats">
-                        <span>🎯 ${(profile.diceFunctions || []).length} Funktionen</span>
+                        <span>📜 ${(profile.diceFunctions || []).length} Funktionen</span>
                         <span>🎲 ${(profile.simpleDices || []).length} Würfel</span>
                     </div>
                 `;
