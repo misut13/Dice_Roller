@@ -373,11 +373,11 @@
             <h2>Würfelfunktion hinzufügen</h2>
             <div class="input-group">
                 <label for="functionName">Name:</label>
-                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="38">
+                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="32">
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
-                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3 oder 3d6+3" maxlength="20">
+                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3 oder 3d6+3" maxlength="15">
                 <small>Format: Kombinationen wie 3w6+3 oder 3w6+3+2w6-2</small>
             </div>
             <button class="btn" id="saveDiceFunctionBtn">Hinzufügen</button>
@@ -664,12 +664,12 @@
                 alert('Bitte füllen Sie alle Felder aus.');
                 return;
             }
-            if (name.length > 38) {
-                alert('Der Name der Würfelfunktion darf maximal 38 Zeichen lang sein.');
+            if (name.length > 32) {
+                alert('Der Name der Würfelfunktion darf maximal 32 Zeichen lang sein.');
                 return;
             }
-            if (formula.length > 20) {
-                alert('Die Würfelformel darf maximal 20 Zeichen lang sein.');
+            if (formula.length > 15) {
+                alert('Die Würfelformel darf maximal 15 Zeichen lang sein.');
                 return;
             }
 
