@@ -69,33 +69,34 @@
         }
 
         .profile-card {
-            background: white;
-            border-radius: 12px;
+            background: url('Button1.png') no-repeat center;
+            background-size: 100% 100%;
+            border-radius: 8px;
             padding: 16px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border: 2px solid #e2e8f0;
+            box-shadow: none;
+            border: none;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
+            color: black;
         }
 
         .profile-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            border-color: #667eea;
         }
 
         .profile-name {
             font-size: 18px;
             font-weight: bold;
-            color: #2d3748;
+            color: black;
             margin-bottom: 8px;
         }
 
         .profile-stats {
             font-size: 12px;
-            color: #718096;
+            color: black;
             display: flex;
             gap: 16px;
         }
@@ -155,6 +156,12 @@
             background-size: 100% 100%;
         }
 
+        .btn-wood {
+            background: url('Button3.png') no-repeat center;
+            background-size: 100% 100%;
+            color: black;
+        }
+
         .input-group {
             margin-bottom: 16px;
         }
@@ -184,25 +191,18 @@
             border-radius: 8px;
             padding: 8px;
             margin-bottom: 8px;
-            border: 1px solid #e2e8f0;
+            border: none;
             position: relative;
             cursor: pointer;
-        }
-
-        .dice-function-card {
-            background: url('Button2.png') no-repeat center;
-            background-size: cover;
-        }
-
-        .simple-dice-card {
-            background: url('Button3.png') no-repeat center;
-            background-size: cover;
+            background: url('Button1.png') no-repeat center;
+            background-size: 100% 100%;
+            color: black;
         }
 
         .dice-function-name {
             font-size: 16px;
             font-weight: bold;
-            color: #2d3748;
+            color: black;
             margin-bottom: 4px;
         }
 
@@ -338,7 +338,7 @@
                     <p>Erstellen Sie Ihr erstes Charakterprofil</p>
                 </div>
             </div>
-            <button class="btn" id="createNewProfileBtn">Neues Profil erstellen</button>
+            <button class="btn btn-wood" id="createNewProfileBtn">Neues Profil erstellen</button>
         </div>
 
         <!-- Create Profile Screen -->
@@ -366,8 +366,8 @@
 
                 <div id="settingsOverlay" class="settings-overlay">
                     <div class="settings-panel">
-                        <button class="btn" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
-                        <button class="btn" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
+                        <button class="btn btn-wood" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
+                        <button class="btn btn-wood" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
                         <button class="btn btn-danger" id="deleteModeBtn">Löschen</button>
                     </div>
                 </div>
