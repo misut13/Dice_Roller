@@ -566,7 +566,8 @@
             if (currentProfile) {
                 const headerTitle = document.getElementById('headerTitle');
                 headerTitle.textContent = currentProfile.name;
-                headerTitle.style.fontSize = currentProfile.name.length > 14 ? '20px' : '';
+                // Reduce oversized profile names by two font-size steps
+                headerTitle.style.fontSize = currentProfile.name.length > 14 ? '16px' : '';
                 document.getElementById('headerSubtitle').textContent = '';
                 renderProfileDetail();
             }
