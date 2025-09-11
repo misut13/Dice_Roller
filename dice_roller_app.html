@@ -771,9 +771,16 @@
             if (active === 'profileDetailScreen' && lastRoll) {
                 bar.style.display = 'flex';
                 if (lastRoll.isAttack) {
-                    text.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">Angriff: ${escapeHtml(lastRoll.attack.details)} = <strong>${lastRoll.attack.result}</strong><br>Schaden: ${escapeHtml(lastRoll.damage.details)} = <strong>${lastRoll.damage.result}</strong></span>`;
+                    text.innerHTML = `
+                        <div class="roll-name">${escapeHtml(lastRoll.name)}</div>
+                        <div class="roll-result">Angriff: ${escapeHtml(lastRoll.attack.details)} = <strong>${lastRoll.attack.result}</strong></div>
+                        <div class="roll-result">Schaden: ${escapeHtml(lastRoll.damage.details)} = <strong>${lastRoll.damage.result}</strong></div>
+                    `.trim();
                 } else {
-                    text.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></span>`;
+                    text.innerHTML = `
+                        <div class="roll-name">${escapeHtml(lastRoll.name)}</div>
+                        <div class="roll-result">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></div>
+                    `.trim();
                 }
             } else {
                 bar.style.display = 'none';
