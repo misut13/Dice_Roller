@@ -380,6 +380,7 @@
         <div class="screen" id="profileDetailScreen">
             <div id="profileContent">
                 <div id="diceFunctions">
+                    <div id="attackFunctionsList"></div>
                     <div id="diceFunctionsList"></div>
                 </div>
 
@@ -390,6 +391,7 @@
 
             <div id="settingsOverlay" class="settings-overlay">
                 <div class="settings-panel">
+                    <button class="btn btn-wood" id="addAttackFunctionBtn">Angriffsfunktion hinzufügen</button>
                     <button class="btn btn-wood" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
                     <button class="btn btn-wood" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
                     <button class="btn btn-danger" id="deleteModeBtn">Löschen</button>
@@ -434,6 +436,24 @@
             <button class="btn btn-secondary" id="saveSimpleDiceBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelSimpleDiceBtn">Abbrechen</button>
         </div>
+        <!-- Add Attack Function Screen -->
+        <div class="screen" id="addAttackFunctionScreen">
+            <h2>Angriffsfunktion hinzufügen</h2>
+            <div class="input-group">
+                <label for="attackFunctionName">Name:</label>
+                <input type="text" id="attackFunctionName" placeholder="z.B. Schwerthieb" maxlength="18">
+            </div>
+            <div class="input-group">
+                <label for="attackFunctionAttack">Angriffswurf:</label>
+                <input type="text" id="attackFunctionAttack" placeholder="z.B. 1w20+5" maxlength="15">
+            </div>
+            <div class="input-group">
+                <label for="attackFunctionDamage">Schadenswurf:</label>
+                <input type="text" id="attackFunctionDamage" placeholder="z.B. 2w4+1" maxlength="15">
+            </div>
+            <button class="btn btn-secondary" id="saveAttackFunctionBtn">Hinzufügen</button>
+            <button class="btn btn-secondary" id="cancelAttackFunctionBtn">Abbrechen</button>
+        </div>
         <div id="lastRollBar" class="last-roll-bar" style="display:none;"></div>
     </div>
 
@@ -455,6 +475,9 @@
                     diceFunctions: [
                         { name: 'Schwert Angriff', formula: '1w20+5' },
                         { name: 'Feuerball', formula: '3d6+2' }
+                    ],
+                    attackFunctions: [
+                        { name: 'Schwertangriff', attack: '1w20+5', damage: '2w4+1' }
                     ],
                     simpleDices: [
                         { sides: 20 },
@@ -522,6 +545,16 @@
             }
         }
 
+        function showAddAttackFunction() {
+            closeSettings();
+            showScreen('addAttackFunctionScreen');
+            document.getElementById('headerTitle').textContent = 'Angriffsfunktion';
+            document.getElementById('headerSubtitle').textContent = 'Neue Funktion hinzufügen';
+            document.getElementById('attackFunctionName').value = '';
+            document.getElementById('attackFunctionAttack').value = '';
+            document.getElementById('attackFunctionDamage').value = '';
+        }
+
         function showAddDiceFunction() {
             closeSettings();
             showScreen('addDiceFunctionScreen');
@@ -564,7 +597,7 @@
                     <button class="profile-delete-btn" title="Profil löschen">×</button>
                     <div class="profile-name">${escapeHtml(profile.name)}</div>
                     <div class="profile-stats">
-                        <span>📜 ${(profile.diceFunctions || []).length} Funktionen</span>
+                        <span>📜 ${(profile.diceFunctions || []).length + (profile.attackFunctions || []).length} Funktionen</span>
                         <span>🎲 ${(profile.simpleDices || []).length} Würfel</span>
                     </div>
                 `;
@@ -601,6 +634,7 @@
                 id: generateId(),
                 name: name,
                 diceFunctions: [],
+                attackFunctions: [],
                 simpleDices: standardDiceSides.map(sides => ({ sides }))
             };
 
@@ -616,64 +650,93 @@
 
         // Profile Detail Rendering
         function renderProfileDetail() {
+            const attackFunctionsList = document.getElementById('attackFunctionsList');
             const diceFunctionsList = document.getElementById('diceFunctionsList');
             const simpleDicesList = document.getElementById('simpleDicesList');
 
             // Clear previous content
+            attackFunctionsList.innerHTML = '';
             diceFunctionsList.innerHTML = '';
             simpleDicesList.innerHTML = '';
 
-            // Würfelfunktionen (ohne Überschrift)
-                if (!currentProfile.diceFunctions || currentProfile.diceFunctions.length === 0) {
-                    diceFunctionsList.innerHTML = '<p style="color: #718096; font-style: italic;">Keine Würfelfunktionen definiert</p>';
-                } else {
-                    currentProfile.diceFunctions.forEach((func, index) => {
-                        const card = document.createElement('div');
-                        card.className = 'dice-function-card';
-                        const name = escapeHtml(func.name.substring(0, 18));
-                        card.innerHTML = `
-                            <div class="dice-function-name">${name}</div>
-                            <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
-                        `;
+            // Angriffsfunktionen
+            if (!currentProfile.attackFunctions || currentProfile.attackFunctions.length === 0) {
+                attackFunctionsList.innerHTML = '<p style="color: #718096; font-style: italic;">Keine Angriffsfunktionen definiert</p>';
+            } else {
+                currentProfile.attackFunctions.forEach((func, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'dice-function-card';
+                    const name = escapeHtml(func.name.substring(0, 18));
+                    card.innerHTML = `
+                        <div class="dice-function-name">${name}</div>
+                        <div class="dice-function-formula">A: ${escapeHtml(func.attack)} | S: ${escapeHtml(func.damage)}</div>
+                    `;
 
-                        card.addEventListener('click', () => {
-                            if (deleteMode) {
-                                currentProfile.diceFunctions.splice(index, 1);
-                                deleteMode = false;
-                                renderProfileDetail();
-                            } else {
-                                rollDiceFunction(index);
-                            }
-                        });
-
-                        diceFunctionsList.appendChild(card);
+                    card.addEventListener('click', () => {
+                        if (deleteMode) {
+                            currentProfile.attackFunctions.splice(index, 1);
+                            deleteMode = false;
+                            renderProfileDetail();
+                        } else {
+                            rollAttackFunction(index);
+                        }
                     });
-                }
+
+                    attackFunctionsList.appendChild(card);
+                });
+            }
+
+            // Würfelfunktionen (ohne Überschrift)
+            if (!currentProfile.diceFunctions || currentProfile.diceFunctions.length === 0) {
+                diceFunctionsList.innerHTML = '<p style="color: #718096; font-style: italic;">Keine Würfelfunktionen definiert</p>';
+            } else {
+                currentProfile.diceFunctions.forEach((func, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'dice-function-card';
+                    const name = escapeHtml(func.name.substring(0, 18));
+                    card.innerHTML = `
+                        <div class="dice-function-name">${name}</div>
+                        <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
+                    `;
+
+                    card.addEventListener('click', () => {
+                        if (deleteMode) {
+                            currentProfile.diceFunctions.splice(index, 1);
+                            deleteMode = false;
+                            renderProfileDetail();
+                        } else {
+                            rollDiceFunction(index);
+                        }
+                    });
+
+                    diceFunctionsList.appendChild(card);
+                });
+            }
 
             // Einfache Würfel
-                if (!currentProfile.simpleDices || currentProfile.simpleDices.length === 0) {
-                    simpleDicesList.innerHTML = '<p style="color: #718096; font-style: italic;">Keine einfachen Würfel hinzugefügt</p>';
-                } else {
-                    currentProfile.simpleDices.forEach((dice, index) => {
-                        const card = document.createElement('div');
-                        card.className = 'simple-dice-card';
-                        card.innerHTML = `
-                            <div class="dice-function-name">W${dice.sides}</div>
-                        `;
+            if (!currentProfile.simpleDices || currentProfile.simpleDices.length === 0) {
+                simpleDicesList.innerHTML = '<p style="color: #718096; font-style: italic;">Keine einfachen Würfel hinzugefügt</p>';
+            } else {
+                currentProfile.simpleDices.forEach((dice, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'simple-dice-card';
+                    card.innerHTML = `
+                        <div class="dice-function-name">W${dice.sides}</div>
+                    `;
 
-                        card.addEventListener('click', () => {
-                            if (deleteMode) {
-                                currentProfile.simpleDices.splice(index, 1);
-                                deleteMode = false;
-                                renderProfileDetail();
-                            } else {
-                                rollSimpleDice(index);
-                            }
-                        });
-
-                        simpleDicesList.appendChild(card);
+                    card.addEventListener('click', () => {
+                        if (deleteMode) {
+                            currentProfile.simpleDices.splice(index, 1);
+                            deleteMode = false;
+                            renderProfileDetail();
+                        } else {
+                            rollSimpleDice(index);
+                        }
                     });
-                }
+
+                    simpleDicesList.appendChild(card);
+                });
+            }
 
             updateLastRollBar();
         }
@@ -683,13 +746,44 @@
             const active = document.querySelector('.screen.active').id;
             if (active === 'profileDetailScreen' && lastRoll) {
                 bar.style.display = 'block';
-                bar.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></span>`;
+                if (lastRoll.isAttack) {
+                    bar.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">Angriff: ${escapeHtml(lastRoll.attack.details)} = <strong>${lastRoll.attack.result}</strong><br>Schaden: ${escapeHtml(lastRoll.damage.details)} = <strong>${lastRoll.damage.result}</strong></span>`;
+                } else {
+                    bar.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></span>`;
+                }
             } else {
                 bar.style.display = 'none';
             }
         }
 
         // Dice Functions
+        function addAttackFunction() {
+            const name = document.getElementById('attackFunctionName').value.trim().substring(0, 18);
+            const attack = document.getElementById('attackFunctionAttack').value.trim();
+            const damage = document.getElementById('attackFunctionDamage').value.trim();
+
+            if (!name || !attack || !damage) {
+                alert('Bitte füllen Sie alle Felder aus.');
+                return;
+            }
+            if (name.length > 18) {
+                alert('Der Name der Angriffsfunktion darf maximal 18 Zeichen lang sein.');
+                return;
+            }
+            if (attack.length > 15 || damage.length > 15) {
+                alert('Die Würfelformel darf maximal 15 Zeichen lang sein.');
+                return;
+            }
+
+            if (!isValidFormula(attack) || !isValidFormula(damage)) {
+                alert('Ungültige Formel. Beispiele: 3w6+3 oder 3w6+3+2w6-2');
+                return;
+            }
+
+            currentProfile.attackFunctions.push({ name, attack, damage });
+            showProfileDetail();
+        }
+
         function addDiceFunction() {
             const name = document.getElementById('functionName').value.trim().substring(0, 18);
             const formula = document.getElementById('functionFormula').value.trim();
@@ -768,19 +862,13 @@
             return Math.floor(Math.random() * sides) + 1;
         }
 
-        function rollDiceFunction(index) {
-            const func = currentProfile.diceFunctions[index];
-            const terms = parseFormula(func.formula);
-
-            if (!terms) {
-                alert('Fehlerhafte Formel');
-                return;
-            }
-
+        function rollFromFormula(formula) {
+            const terms = parseFormula(formula);
+            if (!terms) return null;
             let total = 0;
             const detailParts = [];
 
-            terms.forEach((term, i) => {
+            terms.forEach(term => {
                 if (term.type === 'dice') {
                     const rolls = [];
                     for (let r = 0; r < term.count; r++) {
@@ -797,10 +885,43 @@
                 }
             });
 
+            return { total, detail: detailParts.join(' ') };
+        }
+
+        function rollDiceFunction(index) {
+            const func = currentProfile.diceFunctions[index];
+            const result = rollFromFormula(func.formula);
+
+            if (!result) {
+                alert('Fehlerhafte Formel');
+                return;
+            }
+
             lastRoll = {
                 name: func.name,
-                details: detailParts.join(' '),
-                result: total
+                details: result.detail,
+                result: result.total
+            };
+            updateLastRollBar();
+        }
+
+        function rollAttackFunction(index) {
+            const func = currentProfile.attackFunctions[index];
+            const attack = rollFromFormula(func.attack);
+            const damage = rollFromFormula(func.damage);
+
+            if (!attack || !damage) {
+                alert('Fehlerhafte Formel');
+                return;
+            }
+
+            alert(`${func.name}\nAngriff: ${attack.detail} = ${attack.total}\nSchaden: ${damage.detail} = ${damage.total}`);
+
+            lastRoll = {
+                name: func.name,
+                isAttack: true,
+                attack: { details: attack.detail, result: attack.total },
+                damage: { details: damage.detail, result: damage.total }
             };
             updateLastRollBar();
         }
@@ -873,11 +994,14 @@
             document.getElementById('cancelCreateProfileBtn').addEventListener('click', showProfileList);
 
             // Settings panel
+            document.getElementById('addAttackFunctionBtn').addEventListener('click', showAddAttackFunction);
             document.getElementById('addDiceFunctionBtn').addEventListener('click', showAddDiceFunction);
             document.getElementById('addSimpleDiceBtn').addEventListener('click', showAddSimpleDice);
             document.getElementById('deleteModeBtn').addEventListener('click', enableDeleteMode);
 
             // Dice function creation
+            document.getElementById('saveAttackFunctionBtn').addEventListener('click', addAttackFunction);
+            document.getElementById('cancelAttackFunctionBtn').addEventListener('click', showProfileDetail);
             document.getElementById('saveDiceFunctionBtn').addEventListener('click', addDiceFunction);
             document.getElementById('cancelDiceFunctionBtn').addEventListener('click', showProfileDetail);
 
