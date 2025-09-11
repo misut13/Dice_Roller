@@ -318,28 +318,44 @@
             opacity: 0.5;
         }
 
-        /* Last roll bar */
-        .last-roll-bar {
-            position: absolute;
-            bottom: 0;
+        /* Result popup */
+        .result-popup {
+            position: fixed;
+            top: 0;
             left: 0;
             width: 100%;
-            background: #faf089;
-            border-top: 1px solid #e2e8f0;
-            padding: 8px;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .result-popup .popup-content {
+            background: url('Button5.png') no-repeat center;
+            background-size: 100% 100%;
+            padding: 40px 20px 20px;
             text-align: center;
-            font-size: 16px;
-            line-height: 1.4;
+            width: 80%;
+            max-width: 300px;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .last-roll-bar .roll-name {
+        .result-popup .roll-name {
             font-weight: bold;
-            display: block;
         }
 
-        .last-roll-bar .roll-result {
-            display: block;
-            margin-top: 4px;
+        .result-popup .roll-result {
+            margin-top: 10px;
+        }
+
+        .result-popup .btn {
+            margin-top: 20px;
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -454,7 +470,12 @@
             <button class="btn btn-secondary" id="saveAttackFunctionBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelAttackFunctionBtn">Abbrechen</button>
         </div>
-        <div id="lastRollBar" class="last-roll-bar" style="display:none;"></div>
+        <div id="lastRollBar" class="result-popup" style="display:none;">
+            <div class="popup-content">
+                <div id="lastRollText"></div>
+                <button class="btn btn-secondary" id="closeResultBtn">Schliessen</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -745,13 +766,14 @@
 
         function updateLastRollBar() {
             const bar = document.getElementById('lastRollBar');
+            const text = document.getElementById('lastRollText');
             const active = document.querySelector('.screen.active').id;
             if (active === 'profileDetailScreen' && lastRoll) {
-                bar.style.display = 'block';
+                bar.style.display = 'flex';
                 if (lastRoll.isAttack) {
-                    bar.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">Angriff: ${escapeHtml(lastRoll.attack.details)} = <strong>${lastRoll.attack.result}</strong><br>Schaden: ${escapeHtml(lastRoll.damage.details)} = <strong>${lastRoll.damage.result}</strong></span>`;
+                    text.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">Angriff: ${escapeHtml(lastRoll.attack.details)} = <strong>${lastRoll.attack.result}</strong><br>Schaden: ${escapeHtml(lastRoll.damage.details)} = <strong>${lastRoll.damage.result}</strong></span>`;
                 } else {
-                    bar.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></span>`;
+                    text.innerHTML = `<span class="roll-name">${escapeHtml(lastRoll.name)}</span><span class="roll-result">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></span>`;
                 }
             } else {
                 bar.style.display = 'none';
@@ -1017,6 +1039,9 @@
                 } else {
                     custom.style.display = 'none';
                 }
+            });
+            document.getElementById('closeResultBtn').addEventListener('click', () => {
+                document.getElementById('lastRollBar').style.display = 'none';
             });
         }
 
