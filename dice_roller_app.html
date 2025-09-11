@@ -391,7 +391,7 @@
 
             <div id="settingsOverlay" class="settings-overlay">
                 <div class="settings-panel">
-                    <button class="btn btn-wood" id="addAttackFunctionBtn">Angriffsfunktion hinzufügen</button>
+                    <button class="btn btn-wood" id="addAttackFunctionBtn"><strong>Angriffsfunktion hinzufügen</strong></button>
                     <button class="btn btn-wood" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
                     <button class="btn btn-wood" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
                     <button class="btn btn-danger" id="deleteModeBtn">Löschen</button>
@@ -438,7 +438,7 @@
         </div>
         <!-- Add Attack Function Screen -->
         <div class="screen" id="addAttackFunctionScreen">
-            <h2>Angriffsfunktion hinzufügen</h2>
+            <h2><strong>Angriffsfunktion hinzufügen</strong></h2>
             <div class="input-group">
                 <label for="attackFunctionName">Name:</label>
                 <input type="text" id="attackFunctionName" placeholder="z.B. Schwerthieb" maxlength="18">
@@ -659,58 +659,60 @@
             diceFunctionsList.innerHTML = '';
             simpleDicesList.innerHTML = '';
 
-            // Angriffsfunktionen
-            if (!currentProfile.attackFunctions || currentProfile.attackFunctions.length === 0) {
-                attackFunctionsList.innerHTML = '<p style="color: #718096; font-style: italic;">Keine Angriffsfunktionen definiert</p>';
+            // Angriffsfunktionen und Würfelfunktionen
+            const hasAttackFunctions = currentProfile.attackFunctions && currentProfile.attackFunctions.length > 0;
+            const hasDiceFunctions = currentProfile.diceFunctions && currentProfile.diceFunctions.length > 0;
+
+            if (!hasAttackFunctions && !hasDiceFunctions) {
+                attackFunctionsList.innerHTML = '<p style="color: #718096; font-style: italic;">Es sind keine Funktionen definiert</p>';
             } else {
-                currentProfile.attackFunctions.forEach((func, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'dice-function-card';
-                    const name = escapeHtml(func.name.substring(0, 18));
-                    card.innerHTML = `
-                        <div class="dice-function-name">${name}</div>
-                        <div class="dice-function-formula">A: ${escapeHtml(func.attack)} | S: ${escapeHtml(func.damage)}</div>
-                    `;
+                if (hasAttackFunctions) {
+                    currentProfile.attackFunctions.forEach((func, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'dice-function-card';
+                        const name = escapeHtml(func.name.substring(0, 18));
+                        card.innerHTML = `
+                            <div class="dice-function-name">${name}</div>
+                            <div class="dice-function-formula">A: ${escapeHtml(func.attack)} | S: ${escapeHtml(func.damage)}</div>
+                        `;
 
-                    card.addEventListener('click', () => {
-                        if (deleteMode) {
-                            currentProfile.attackFunctions.splice(index, 1);
-                            deleteMode = false;
-                            renderProfileDetail();
-                        } else {
-                            rollAttackFunction(index);
-                        }
+                        card.addEventListener('click', () => {
+                            if (deleteMode) {
+                                currentProfile.attackFunctions.splice(index, 1);
+                                deleteMode = false;
+                                renderProfileDetail();
+                            } else {
+                                rollAttackFunction(index);
+                            }
+                        });
+
+                        attackFunctionsList.appendChild(card);
                     });
+                }
 
-                    attackFunctionsList.appendChild(card);
-                });
-            }
+                if (hasDiceFunctions) {
+                    currentProfile.diceFunctions.forEach((func, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'dice-function-card';
+                        const name = escapeHtml(func.name.substring(0, 18));
+                        card.innerHTML = `
+                            <div class="dice-function-name">${name}</div>
+                            <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
+                        `;
 
-            // Würfelfunktionen (ohne Überschrift)
-            if (!currentProfile.diceFunctions || currentProfile.diceFunctions.length === 0) {
-                diceFunctionsList.innerHTML = '<p style="color: #718096; font-style: italic;">Keine Würfelfunktionen definiert</p>';
-            } else {
-                currentProfile.diceFunctions.forEach((func, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'dice-function-card';
-                    const name = escapeHtml(func.name.substring(0, 18));
-                    card.innerHTML = `
-                        <div class="dice-function-name">${name}</div>
-                        <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
-                    `;
+                        card.addEventListener('click', () => {
+                            if (deleteMode) {
+                                currentProfile.diceFunctions.splice(index, 1);
+                                deleteMode = false;
+                                renderProfileDetail();
+                            } else {
+                                rollDiceFunction(index);
+                            }
+                        });
 
-                    card.addEventListener('click', () => {
-                        if (deleteMode) {
-                            currentProfile.diceFunctions.splice(index, 1);
-                            deleteMode = false;
-                            renderProfileDetail();
-                        } else {
-                            rollDiceFunction(index);
-                        }
+                        diceFunctionsList.appendChild(card);
                     });
-
-                    diceFunctionsList.appendChild(card);
-                });
+                }
             }
 
             // Einfache Würfel
