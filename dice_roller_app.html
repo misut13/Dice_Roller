@@ -74,7 +74,7 @@
             background: url('Button1.png') no-repeat center;
             background-size: 100% 100%;
             border-radius: 8px;
-            padding: 16px 16px 16px 8px;
+            padding: 16px 16px 16px calc(8px + 2ch);
             margin-bottom: 12px;
             box-shadow: none;
             border: none;
@@ -189,7 +189,6 @@
 
         .dice-function-card, .simple-dice-card {
             border-radius: 8px;
-            padding: 8px;
             margin-bottom: 8px;
             border: none;
             position: relative;
@@ -199,7 +198,13 @@
             color: black;
         }
 
+        .dice-function-card {
+            padding: 8px;
+            padding-left: calc(8px + 2ch);
+        }
+
         .simple-dice-card {
+            padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -220,7 +225,7 @@
 
         .dice-function-formula {
             font-family: 'Courier New', monospace;
-            color: #667eea;
+            color: black;
             font-size: 12px;
             margin-bottom: 6px;
         }
@@ -280,7 +285,7 @@
         }
 
         #diceFunctions {
-            flex: 2;
+            flex: 3;
             overflow-y: auto;
         }
 
@@ -390,7 +395,7 @@
             <h2>Würfelfunktion hinzufügen</h2>
             <div class="input-group">
                 <label for="functionName">Name:</label>
-                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="24">
+                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="18">
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
@@ -618,7 +623,7 @@
                     currentProfile.diceFunctions.forEach((func, index) => {
                         const card = document.createElement('div');
                         card.className = 'dice-function-card';
-                        const name = escapeHtml(func.name.substring(0, 24));
+                        const name = escapeHtml(func.name.substring(0, 18));
                         card.innerHTML = `
                             <div class="dice-function-name">${name}</div>
                             <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
@@ -679,15 +684,15 @@
 
         // Dice Functions
         function addDiceFunction() {
-            const name = document.getElementById('functionName').value.trim().substring(0, 24);
+            const name = document.getElementById('functionName').value.trim().substring(0, 18);
             const formula = document.getElementById('functionFormula').value.trim();
 
             if (!name || !formula) {
                 alert('Bitte füllen Sie alle Felder aus.');
                 return;
             }
-            if (name.length > 24) {
-                alert('Der Name der Würfelfunktion darf maximal 24 Zeichen lang sein.');
+            if (name.length > 18) {
+                alert('Der Name der Würfelfunktion darf maximal 18 Zeichen lang sein.');
                 return;
             }
             if (formula.length > 15) {
