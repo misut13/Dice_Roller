@@ -548,6 +548,7 @@
             headerTitle.textContent = 'DiceForge';
             headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = '';
+            document.querySelector('.header').style.height = '';
             renderProfiles();
         }
 
@@ -557,6 +558,7 @@
             headerTitle.textContent = 'Neues Profil';
             headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Charakterprofil erstellen';
+            document.querySelector('.header').style.height = '';
             document.getElementById('profileName').value = '';
         }
 
@@ -565,8 +567,17 @@
             deleteMode = false;
             if (currentProfile) {
                 const headerTitle = document.getElementById('headerTitle');
+                const header = document.querySelector('.header');
+                const baseHeight = header.offsetHeight;
                 headerTitle.textContent = currentProfile.name;
-                headerTitle.style.fontSize = currentProfile.name.length > 14 ? '20px' : '';
+                // Reduce oversized profile names by two font-size steps but keep header height
+                if (currentProfile.name.length > 14) {
+                    headerTitle.style.fontSize = '16px';
+                    header.style.height = baseHeight + 'px';
+                } else {
+                    headerTitle.style.fontSize = '';
+                    header.style.height = '';
+                }
                 document.getElementById('headerSubtitle').textContent = '';
                 renderProfileDetail();
             }
@@ -579,6 +590,7 @@
             headerTitle.textContent = 'Angriffsfunktion';
             headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Neue Funktion hinzufügen';
+            document.querySelector('.header').style.height = '';
             document.getElementById('attackFunctionName').value = '';
             document.getElementById('attackFunctionAttack').value = '';
             document.getElementById('attackFunctionDamage').value = '';
@@ -591,6 +603,7 @@
             headerTitle.textContent = 'Würfelfunktion';
             headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Neue Funktion hinzufügen';
+            document.querySelector('.header').style.height = '';
             document.getElementById('functionName').value = '';
             document.getElementById('functionFormula').value = '';
         }
@@ -602,6 +615,7 @@
             headerTitle.textContent = 'Einfacher Würfel';
             headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Neuen Würfel hinzufügen';
+            document.querySelector('.header').style.height = '';
             document.getElementById('diceType').value = '6';
             document.getElementById('customDiceSides').value = '';
             document.getElementById('customDiceSides').style.display = 'none';
