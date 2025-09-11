@@ -136,6 +136,8 @@
         .btn-secondary {
             background: url('Button2.png') no-repeat center;
             background-size: 100% 100%;
+            color: black;
+            font-weight: bold;
         }
 
         .btn-danger {
@@ -195,6 +197,18 @@
             background: url('Button1.png') no-repeat center;
             background-size: 100% 100%;
             color: black;
+        }
+
+        .simple-dice-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .simple-dice-card .dice-function-name {
+            margin-bottom: 0;
+            width: 100%;
+            text-align: center;
         }
 
         .dice-function-name {
@@ -346,7 +360,7 @@
                 <label for="profileName">Profilname:</label>
                 <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="20">
             </div>
-            <button class="btn" id="createProfileBtn">Profil erstellen</button>
+            <button class="btn btn-secondary" id="createProfileBtn">Profil erstellen</button>
             <button class="btn btn-secondary" id="cancelCreateProfileBtn">Abbrechen</button>
         </div>
 
