@@ -544,14 +544,18 @@
 
         function showProfileList() {
             showScreen('profileListScreen');
-            document.getElementById('headerTitle').textContent = 'DiceForge';
+            const headerTitle = document.getElementById('headerTitle');
+            headerTitle.textContent = 'DiceForge';
+            headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = '';
             renderProfiles();
         }
 
         function showCreateProfile() {
             showScreen('createProfileScreen');
-            document.getElementById('headerTitle').textContent = 'Neues Profil';
+            const headerTitle = document.getElementById('headerTitle');
+            headerTitle.textContent = 'Neues Profil';
+            headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Charakterprofil erstellen';
             document.getElementById('profileName').value = '';
         }
@@ -560,7 +564,9 @@
             showScreen('profileDetailScreen');
             deleteMode = false;
             if (currentProfile) {
-                document.getElementById('headerTitle').textContent = currentProfile.name;
+                const headerTitle = document.getElementById('headerTitle');
+                headerTitle.textContent = currentProfile.name;
+                headerTitle.style.fontSize = currentProfile.name.length > 14 ? '20px' : '';
                 document.getElementById('headerSubtitle').textContent = '';
                 renderProfileDetail();
             }
@@ -569,7 +575,9 @@
         function showAddAttackFunction() {
             closeSettings();
             showScreen('addAttackFunctionScreen');
-            document.getElementById('headerTitle').textContent = 'Angriffsfunktion';
+            const headerTitle = document.getElementById('headerTitle');
+            headerTitle.textContent = 'Angriffsfunktion';
+            headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Neue Funktion hinzufügen';
             document.getElementById('attackFunctionName').value = '';
             document.getElementById('attackFunctionAttack').value = '';
@@ -579,7 +587,9 @@
         function showAddDiceFunction() {
             closeSettings();
             showScreen('addDiceFunctionScreen');
-            document.getElementById('headerTitle').textContent = 'Würfelfunktion';
+            const headerTitle = document.getElementById('headerTitle');
+            headerTitle.textContent = 'Würfelfunktion';
+            headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Neue Funktion hinzufügen';
             document.getElementById('functionName').value = '';
             document.getElementById('functionFormula').value = '';
@@ -588,7 +598,9 @@
         function showAddSimpleDice() {
             closeSettings();
             showScreen('addSimpleDiceScreen');
-            document.getElementById('headerTitle').textContent = 'Einfacher Würfel';
+            const headerTitle = document.getElementById('headerTitle');
+            headerTitle.textContent = 'Einfacher Würfel';
+            headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Neuen Würfel hinzufügen';
             document.getElementById('diceType').value = '6';
             document.getElementById('customDiceSides').value = '';
