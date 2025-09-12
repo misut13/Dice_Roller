@@ -790,8 +790,8 @@
                 if (lastRoll.isAttack) {
                     text.innerHTML = `
                         <div class="roll-name">${escapeHtml(lastRoll.name)}</div>
-                        <div class="roll-result">Angriff: ${escapeHtml(lastRoll.attack.details)} = <strong>${lastRoll.attack.result}</strong></div>
-                        <div class="roll-result">Schaden: ${escapeHtml(lastRoll.damage.details)} = <strong>${lastRoll.damage.result}</strong></div>
+                        <div class="roll-result"><strong>Angriff:</strong> ${escapeHtml(lastRoll.attack.details)} = <strong>${lastRoll.attack.result}</strong></div>
+                        <div class="roll-result"><strong>Schaden:</strong> ${escapeHtml(lastRoll.damage.details)} = <strong>${lastRoll.damage.result}</strong></div>
                     `.trim();
                 } else {
                     text.innerHTML = `
