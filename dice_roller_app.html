@@ -491,25 +491,47 @@
 
         const standardDiceSides = [3, 4, 6, 8, 10, 12, 20, 100];
 
+        // Cookie persistence
+        function saveProfilesToCookie() {
+            document.cookie = 'profiles=' + encodeURIComponent(JSON.stringify(profiles)) + ';path=/;max-age=31536000';
+        }
+
+        function loadProfilesFromCookie() {
+            const match = document.cookie.match(/(?:^|; )profiles=([^;]*)/);
+            if (match) {
+                try {
+                    profiles = JSON.parse(decodeURIComponent(match[1]));
+                } catch (e) {
+                    profiles = [];
+                }
+            } else {
+                profiles = [];
+            }
+        }
+
         // Initialize with demo data
         function initializeApp() {
-            profiles = [
-                {
-                    id: '1',
-                    name: 'Beispiel Held',
-                    diceFunctions: [
-                        { name: 'Schwert Angriff', formula: '1w20+5' },
-                        { name: 'Feuerball', formula: '3d6+2' }
-                    ],
-                    attackFunctions: [
-                        { name: 'Schwertangriff', attack: '1w20+5', damage: '2w4+1' }
-                    ],
-                    simpleDices: [
-                        { sides: 20 },
-                        { sides: 6 }
-                    ]
-                }
-            ];
+            loadProfilesFromCookie();
+            if (profiles.length === 0) {
+                profiles = [
+                    {
+                        id: '1',
+                        name: 'Beispiel Held',
+                        diceFunctions: [
+                            { name: 'Schwert Angriff', formula: '1w20+5' },
+                            { name: 'Feuerball', formula: '3d6+2' }
+                        ],
+                        attackFunctions: [
+                            { name: 'Schwertangriff', attack: '1w20+5', damage: '2w4+1' }
+                        ],
+                        simpleDices: [
+                            { sides: 20 },
+                            { sides: 6 }
+                        ]
+                    }
+                ];
+                saveProfilesToCookie();
+            }
         }
 
         // Utility Functions
@@ -650,6 +672,7 @@
                 profileCard.querySelector('.profile-delete-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
                     profiles = profiles.filter(p => p.id !== profile.id);
+                    saveProfilesToCookie();
                     renderProfiles();
                 });
                 
@@ -677,6 +700,7 @@
             };
 
             profiles.push(profile);
+            saveProfilesToCookie();
             showProfileList();
         }
 
@@ -718,6 +742,7 @@
                             if (deleteMode) {
                                 currentProfile.attackFunctions.splice(index, 1);
                                 deleteMode = false;
+                                saveProfilesToCookie();
                                 renderProfileDetail();
                             } else {
                                 rollAttackFunction(index);
@@ -742,6 +767,7 @@
                             if (deleteMode) {
                                 currentProfile.diceFunctions.splice(index, 1);
                                 deleteMode = false;
+                                saveProfilesToCookie();
                                 renderProfileDetail();
                             } else {
                                 rollDiceFunction(index);
@@ -768,6 +794,7 @@
                         if (deleteMode) {
                             currentProfile.simpleDices.splice(index, 1);
                             deleteMode = false;
+                            saveProfilesToCookie();
                             renderProfileDetail();
                         } else {
                             rollSimpleDice(index);
@@ -829,6 +856,7 @@
             }
 
             currentProfile.attackFunctions.push({ name, attack, damage });
+            saveProfilesToCookie();
             lastRoll = null;
             showProfileDetail();
         }
@@ -856,6 +884,7 @@
             }
 
             currentProfile.diceFunctions.push({ name, formula });
+            saveProfilesToCookie();
             lastRoll = null;
             showProfileDetail();
         }
@@ -874,6 +903,7 @@
                 return;
             }
             currentProfile.simpleDices.push({ sides });
+            saveProfilesToCookie();
             lastRoll = null;
             showProfileDetail();
         }
