@@ -290,18 +290,6 @@
             max-width: 300px;
         }
 
-        .delete-mode-hint {
-            display: none;
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #feb2b2;
-            border-radius: 8px;
-            padding: 10px 12px;
-            margin-bottom: 16px;
-            font-weight: 600;
-            text-align: center;
-        }
-
         #profileContent {
             display: flex;
             gap: 16px;
@@ -416,7 +404,6 @@
 
         <!-- Profile Detail Screen -->
         <div class="screen" id="profileDetailScreen">
-            <div id="deleteModeHint" class="delete-mode-hint">Löschmodus aktiv – tippen, um Einträge zu entfernen. Zahnrad erneut drücken zum Beenden.</div>
             <div id="profileContent">
                 <div id="diceFunctions">
                     <div id="attackFunctionsList"></div>
@@ -511,12 +498,8 @@
         function setDeleteModeState(isActive) {
             deleteMode = isActive;
             const profileContent = document.getElementById('profileContent');
-            const hint = document.getElementById('deleteModeHint');
             if (profileContent) {
                 profileContent.classList.toggle('delete-mode', deleteMode);
-            }
-            if (hint) {
-                hint.style.display = deleteMode ? 'block' : 'none';
             }
         }
 
