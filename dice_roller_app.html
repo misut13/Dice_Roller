@@ -488,8 +488,34 @@
         let currentProfile = null;
         let lastRoll = null;
         let deleteMode = false;
+        const DELETE_SUPPRESS_DURATION = 250;
+        let lastDeleteTimestamp = 0;
 
         const standardDiceSides = [3, 4, 6, 8, 10, 12, 20, 100];
+        const diceSoundFiles = [
+            'sounds/dice1.wav',
+            'sounds/dice2.wav',
+            'sounds/dice3.wav',
+            'sounds/dice4.wav',
+            'sounds/dice5.wav'
+        ];
+        const multiDiceSoundFiles = [
+            'sounds/multidice1.wav',
+            'sounds/multidice2.wav',
+            'sounds/multidice3.wav',
+            'sounds/multidice4.wav',
+            'sounds/multidice5.wav',
+            'sounds/multidice6.wav'
+        ];
+
+        function playRandomSound(soundFiles) {
+            if (!soundFiles || soundFiles.length === 0) {
+                return;
+            }
+            const source = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+            const audio = new Audio(source);
+            audio.play().catch(() => {});
+        }
 
         // Persistenz über Local Storage
         function saveProfiles() {
@@ -720,6 +746,7 @@
                                 e.preventDefault();
                                 currentProfile.attackFunctions.splice(index, 1);
                                 deleteMode = false;
+                                lastDeleteTimestamp = Date.now();
                                 saveProfiles();
                                 renderProfileDetail();
                                 return;
@@ -747,6 +774,7 @@
                                 e.preventDefault();
                                 currentProfile.diceFunctions.splice(index, 1);
                                 deleteMode = false;
+                                lastDeleteTimestamp = Date.now();
                                 saveProfiles();
                                 renderProfileDetail();
                                 return;
@@ -776,6 +804,7 @@
                             e.preventDefault();
                             currentProfile.simpleDices.splice(index, 1);
                             deleteMode = false;
+                            lastDeleteTimestamp = Date.now();
                             saveProfiles();
                             renderProfileDetail();
                             return;
@@ -951,7 +980,14 @@
             return { total, detail: detailParts.join(' ') };
         }
 
+        function shouldSuppressRoll() {
+            return Date.now() - lastDeleteTimestamp < DELETE_SUPPRESS_DURATION;
+        }
+
         function rollDiceFunction(index) {
+            if (deleteMode || shouldSuppressRoll()) {
+                return;
+            }
             const func = currentProfile.diceFunctions[index];
             const result = rollFromFormula(func.formula);
 
@@ -965,10 +1001,14 @@
                 details: result.detail,
                 result: result.total
             };
+            playRandomSound(multiDiceSoundFiles);
             updateLastRollBar();
         }
 
         function rollAttackFunction(index) {
+            if (deleteMode || shouldSuppressRoll()) {
+                return;
+            }
             const func = currentProfile.attackFunctions[index];
             const attack = rollFromFormula(func.attack);
             const damage = rollFromFormula(func.damage);
@@ -984,10 +1024,14 @@
                 attack: { details: attack.detail, result: attack.total },
                 damage: { details: damage.detail, result: damage.total }
             };
+            playRandomSound(multiDiceSoundFiles);
             updateLastRollBar();
         }
 
         function rollSimpleDice(index) {
+            if (deleteMode || shouldSuppressRoll()) {
+                return;
+            }
             const dice = currentProfile.simpleDices[index];
             const result = rollDice(dice.sides);
 
@@ -996,6 +1040,7 @@
                 details: `1w${dice.sides}`,
                 result: result
             };
+            playRandomSound(diceSoundFiles);
             updateLastRollBar();
         }
 
