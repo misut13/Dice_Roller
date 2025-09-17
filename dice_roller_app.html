@@ -490,6 +490,30 @@
         let deleteMode = false;
 
         const standardDiceSides = [3, 4, 6, 8, 10, 12, 20, 100];
+        const diceSoundFiles = [
+            'sounds/dice1.wav',
+            'sounds/dice2.wav',
+            'sounds/dice3.wav',
+            'sounds/dice4.wav',
+            'sounds/dice5.wav'
+        ];
+        const multiDiceSoundFiles = [
+            'sounds/multidice1.wav',
+            'sounds/multidice2.wav',
+            'sounds/multidice3.wav',
+            'sounds/multidice4.wav',
+            'sounds/multidice5.wav',
+            'sounds/multidice6.wav'
+        ];
+
+        function playRandomSound(soundFiles) {
+            if (!soundFiles || soundFiles.length === 0) {
+                return;
+            }
+            const source = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+            const audio = new Audio(source);
+            audio.play().catch(() => {});
+        }
 
         // Persistenz über Local Storage
         function saveProfiles() {
@@ -965,6 +989,7 @@
                 details: result.detail,
                 result: result.total
             };
+            playRandomSound(multiDiceSoundFiles);
             updateLastRollBar();
         }
 
@@ -984,6 +1009,7 @@
                 attack: { details: attack.detail, result: attack.total },
                 damage: { details: damage.detail, result: damage.total }
             };
+            playRandomSound(multiDiceSoundFiles);
             updateLastRollBar();
         }
 
@@ -996,6 +1022,7 @@
                 details: `1w${dice.sides}`,
                 result: result
             };
+            playRandomSound(diceSoundFiles);
             updateLastRollBar();
         }
 
