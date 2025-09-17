@@ -290,9 +290,27 @@
             max-width: 300px;
         }
 
+        .delete-mode-hint {
+            display: none;
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+
         #profileContent {
             display: flex;
             gap: 16px;
+        }
+
+        #profileContent.delete-mode .dice-function-card,
+        #profileContent.delete-mode .simple-dice-card {
+            outline: 2px dashed rgba(197, 48, 48, 0.8);
+            outline-offset: -4px;
         }
 
         #diceFunctions {
@@ -398,6 +416,7 @@
 
         <!-- Profile Detail Screen -->
         <div class="screen" id="profileDetailScreen">
+            <div id="deleteModeHint" class="delete-mode-hint">Löschmodus aktiv – tippen, um Einträge zu entfernen. Zahnrad erneut drücken zum Beenden.</div>
             <div id="profileContent">
                 <div id="diceFunctions">
                     <div id="attackFunctionsList"></div>
@@ -489,6 +508,18 @@
         let lastRoll = null;
         let deleteMode = false;
 
+        function setDeleteModeState(isActive) {
+            deleteMode = isActive;
+            const profileContent = document.getElementById('profileContent');
+            const hint = document.getElementById('deleteModeHint');
+            if (profileContent) {
+                profileContent.classList.toggle('delete-mode', deleteMode);
+            }
+            if (hint) {
+                hint.style.display = deleteMode ? 'block' : 'none';
+            }
+        }
+
         const standardDiceSides = [3, 4, 6, 8, 10, 12, 20, 100];
         const diceSoundFiles = [
             'sounds/dice1.wav',
@@ -532,6 +563,7 @@
         // App initialisieren
         function initializeApp() {
             loadProfiles();
+            setDeleteModeState(false);
         }
 
         // Utility Functions
@@ -570,6 +602,7 @@
 
         function showProfileList() {
             showScreen('profileListScreen');
+            setDeleteModeState(false);
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'DiceForge';
             headerTitle.style.fontSize = '';
@@ -579,6 +612,7 @@
 
         function showCreateProfile() {
             showScreen('createProfileScreen');
+            setDeleteModeState(false);
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Neues Profil';
             headerTitle.style.fontSize = '';
@@ -588,7 +622,7 @@
 
         function showProfileDetail() {
             showScreen('profileDetailScreen');
-            deleteMode = false;
+            setDeleteModeState(false);
             if (currentProfile) {
                 const headerTitle = document.getElementById('headerTitle');
                 headerTitle.textContent = currentProfile.name;
@@ -601,6 +635,7 @@
 
         function showAddAttackFunction() {
             closeSettings();
+            setDeleteModeState(false);
             showScreen('addAttackFunctionScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Angriffsfunktion';
@@ -613,6 +648,7 @@
 
         function showAddDiceFunction() {
             closeSettings();
+            setDeleteModeState(false);
             showScreen('addDiceFunctionScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Würfelfunktion';
@@ -624,6 +660,7 @@
 
         function showAddSimpleDice() {
             closeSettings();
+            setDeleteModeState(false);
             showScreen('addSimpleDiceScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Einfacher Würfel';
@@ -743,7 +780,6 @@
                                 e.stopPropagation();
                                 e.preventDefault();
                                 currentProfile.attackFunctions.splice(index, 1);
-                                deleteMode = false;
                                 saveProfiles();
                                 renderProfileDetail();
                                 return;
@@ -770,7 +806,6 @@
                                 e.stopPropagation();
                                 e.preventDefault();
                                 currentProfile.diceFunctions.splice(index, 1);
-                                deleteMode = false;
                                 saveProfiles();
                                 renderProfileDetail();
                                 return;
@@ -799,7 +834,6 @@
                             e.stopPropagation();
                             e.preventDefault();
                             currentProfile.simpleDices.splice(index, 1);
-                            deleteMode = false;
                             saveProfiles();
                             renderProfileDetail();
                             return;
@@ -1037,7 +1071,7 @@
             } else {
                 overlay.classList.add('active');
                 profileContent.classList.add('dimmed');
-                deleteMode = false;
+                setDeleteModeState(false);
             }
         }
 
@@ -1049,7 +1083,7 @@
         }
 
         function enableDeleteMode() {
-            deleteMode = true;
+            setDeleteModeState(true);
             closeSettings();
         }
 
