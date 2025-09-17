@@ -780,6 +780,7 @@
                                 e.stopPropagation();
                                 e.preventDefault();
                                 currentProfile.attackFunctions.splice(index, 1);
+                                setDeleteModeState(false);
                                 saveProfiles();
                                 renderProfileDetail();
                                 return;
@@ -806,6 +807,7 @@
                                 e.stopPropagation();
                                 e.preventDefault();
                                 currentProfile.diceFunctions.splice(index, 1);
+                                setDeleteModeState(false);
                                 saveProfiles();
                                 renderProfileDetail();
                                 return;
@@ -834,6 +836,7 @@
                             e.stopPropagation();
                             e.preventDefault();
                             currentProfile.simpleDices.splice(index, 1);
+                            setDeleteModeState(false);
                             saveProfiles();
                             renderProfileDetail();
                             return;
