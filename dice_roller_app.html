@@ -1230,14 +1230,14 @@
             });
 
             // Profile creation
-            document.getElementById('createNewProfileBtn').addEventListener('click', showCreateProfile);
+            document.getElementById('createNewProfileBtn').addEventListener('click', () => showCreateProfile());
             document.getElementById('createProfileBtn').addEventListener('click', createProfile);
             document.getElementById('cancelCreateProfileBtn').addEventListener('click', () => navigateBackOr(() => showProfileList(true)));
 
             // Settings panel
-            document.getElementById('addAttackFunctionBtn').addEventListener('click', showAddAttackFunction);
-            document.getElementById('addDiceFunctionBtn').addEventListener('click', showAddDiceFunction);
-            document.getElementById('addSimpleDiceBtn').addEventListener('click', showAddSimpleDice);
+            document.getElementById('addAttackFunctionBtn').addEventListener('click', () => showAddAttackFunction());
+            document.getElementById('addDiceFunctionBtn').addEventListener('click', () => showAddDiceFunction());
+            document.getElementById('addSimpleDiceBtn').addEventListener('click', () => showAddSimpleDice());
             document.getElementById('deleteModeBtn').addEventListener('click', enableDeleteMode);
 
             // Dice function creation
