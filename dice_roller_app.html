@@ -494,6 +494,34 @@
         let currentProfile = null;
         let lastRoll = null;
         let deleteMode = false;
+        const historyBaseUrl = window.location.pathname + window.location.search;
+        let isNavigatingThroughHistory = false;
+
+        function pushHistoryState(view, data = {}) {
+            if (!window.history || !history.pushState || isNavigatingThroughHistory) {
+                return;
+            }
+            const state = { view, ...data };
+            history.pushState(state, '', historyBaseUrl);
+        }
+
+        function replaceHistoryState(view, data = {}) {
+            if (!window.history || !history.replaceState) {
+                return;
+            }
+            const state = { view, ...data };
+            history.replaceState(state, '', historyBaseUrl);
+        }
+
+        function navigateBackOr(fallback) {
+            const hasHistorySupport = window.history && typeof history.back === 'function';
+            const hasAppState = !!(hasHistorySupport && history.state && history.state.view);
+            if (hasHistorySupport && hasAppState) {
+                history.back();
+            } else if (typeof fallback === 'function') {
+                fallback();
+            }
+        }
 
         function setDeleteModeState(isActive) {
             deleteMode = isActive;
@@ -583,7 +611,7 @@
             updateLastRollBar();
         }
 
-        function showProfileList() {
+        function showProfileList(skipHistory = false) {
             showScreen('profileListScreen');
             setDeleteModeState(false);
             const headerTitle = document.getElementById('headerTitle');
@@ -591,9 +619,12 @@
             headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = '';
             renderProfiles();
+            if (!skipHistory) {
+                pushHistoryState('profileList');
+            }
         }
 
-        function showCreateProfile() {
+        function showCreateProfile(skipHistory = false) {
             showScreen('createProfileScreen');
             setDeleteModeState(false);
             const headerTitle = document.getElementById('headerTitle');
@@ -601,9 +632,20 @@
             headerTitle.style.fontSize = '';
             document.getElementById('headerSubtitle').textContent = 'Charakterprofil erstellen';
             document.getElementById('profileName').value = '';
+            if (!skipHistory) {
+                pushHistoryState('createProfile');
+            }
         }
 
-        function showProfileDetail() {
+        function showProfileDetail(skipHistory = false, profileId = null) {
+            if (profileId) {
+                const profile = profiles.find(p => p.id === profileId);
+                if (profile) {
+                    currentProfile = profile;
+                } else {
+                    currentProfile = null;
+                }
+            }
             showScreen('profileDetailScreen');
             setDeleteModeState(false);
             if (currentProfile) {
@@ -613,12 +655,34 @@
                 headerTitle.style.fontSize = currentProfile.name.length > 14 ? '16px' : '';
                 document.getElementById('headerSubtitle').textContent = '';
                 renderProfileDetail();
+                if (!skipHistory) {
+                    pushHistoryState('profileDetail', { profileId: currentProfile.id });
+                }
+            } else {
+                showProfileList(true);
+                if (skipHistory) {
+                    replaceHistoryState('profileList');
+                }
             }
         }
 
-        function showAddAttackFunction() {
+        function showAddAttackFunction(skipHistory = false, profileId = null) {
             closeSettings();
             setDeleteModeState(false);
+            if (profileId) {
+                const profile = profiles.find(p => p.id === profileId);
+                if (profile) {
+                    currentProfile = profile;
+                }
+            }
+            if (!currentProfile) {
+                currentProfile = null;
+                showProfileList(true);
+                if (skipHistory) {
+                    replaceHistoryState('profileList');
+                }
+                return;
+            }
             showScreen('addAttackFunctionScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Angriffsfunktion';
@@ -627,11 +691,28 @@
             document.getElementById('attackFunctionName').value = '';
             document.getElementById('attackFunctionAttack').value = '';
             document.getElementById('attackFunctionDamage').value = '';
+            if (!skipHistory) {
+                pushHistoryState('addAttackFunction', { profileId: currentProfile.id });
+            }
         }
 
-        function showAddDiceFunction() {
+        function showAddDiceFunction(skipHistory = false, profileId = null) {
             closeSettings();
             setDeleteModeState(false);
+            if (profileId) {
+                const profile = profiles.find(p => p.id === profileId);
+                if (profile) {
+                    currentProfile = profile;
+                }
+            }
+            if (!currentProfile) {
+                currentProfile = null;
+                showProfileList(true);
+                if (skipHistory) {
+                    replaceHistoryState('profileList');
+                }
+                return;
+            }
             showScreen('addDiceFunctionScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Würfelfunktion';
@@ -639,11 +720,28 @@
             document.getElementById('headerSubtitle').textContent = 'Neue Funktion hinzufügen';
             document.getElementById('functionName').value = '';
             document.getElementById('functionFormula').value = '';
+            if (!skipHistory) {
+                pushHistoryState('addDiceFunction', { profileId: currentProfile.id });
+            }
         }
 
-        function showAddSimpleDice() {
+        function showAddSimpleDice(skipHistory = false, profileId = null) {
             closeSettings();
             setDeleteModeState(false);
+            if (profileId) {
+                const profile = profiles.find(p => p.id === profileId);
+                if (profile) {
+                    currentProfile = profile;
+                }
+            }
+            if (!currentProfile) {
+                currentProfile = null;
+                showProfileList(true);
+                if (skipHistory) {
+                    replaceHistoryState('profileList');
+                }
+                return;
+            }
             showScreen('addSimpleDiceScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Einfacher Würfel';
@@ -652,6 +750,45 @@
             document.getElementById('diceType').value = '6';
             document.getElementById('customDiceSides').value = '';
             document.getElementById('customDiceSides').style.display = 'none';
+            if (!skipHistory) {
+                pushHistoryState('addSimpleDice', { profileId: currentProfile.id });
+            }
+        }
+
+        function handleHistoryNavigation(event) {
+            const state = event.state || {};
+            const view = state.view;
+            isNavigatingThroughHistory = true;
+            switch (view) {
+                case 'createProfile':
+                    showCreateProfile(true);
+                    break;
+                case 'profileDetail':
+                    showProfileDetail(true, state.profileId || null);
+                    break;
+                case 'addAttackFunction':
+                    showAddAttackFunction(true, state.profileId || null);
+                    break;
+                case 'addDiceFunction':
+                    showAddDiceFunction(true, state.profileId || null);
+                    break;
+                case 'addSimpleDice':
+                    showAddSimpleDice(true, state.profileId || null);
+                    break;
+                case 'profileList':
+                default:
+                    showProfileList(true);
+                    break;
+            }
+            isNavigatingThroughHistory = false;
+        }
+
+        function initializeHistory() {
+            if (!window.history || !history.replaceState) {
+                return;
+            }
+            replaceHistoryState('profileList');
+            window.addEventListener('popstate', handleHistoryNavigation);
         }
 
         // Profile Management
@@ -721,7 +858,7 @@
 
             profiles.push(profile);
             saveProfiles();
-            showProfileList();
+            navigateBackOr(() => showProfileList(true));
         }
 
         function openProfile(profileId) {
@@ -887,7 +1024,7 @@
             currentProfile.attackFunctions.push({ name, attack, damage });
             saveProfiles();
             lastRoll = null;
-            showProfileDetail();
+            navigateBackOr(() => showProfileDetail(true));
         }
 
         function addDiceFunction() {
@@ -915,7 +1052,7 @@
             currentProfile.diceFunctions.push({ name, formula });
             saveProfiles();
             lastRoll = null;
-            showProfileDetail();
+            navigateBackOr(() => showProfileDetail(true));
         }
 
         // Simple Dice
@@ -934,7 +1071,7 @@
             currentProfile.simpleDices.push({ sides });
             saveProfiles();
             lastRoll = null;
-            showProfileDetail();
+            navigateBackOr(() => showProfileDetail(true));
         }
 
         // Dice Rolling
@@ -1080,14 +1217,7 @@
         function initializeEventListeners() {
             // Navigation
             document.getElementById('backBtn').addEventListener('click', () => {
-                const currentScreen = document.querySelector('.screen.active').id;
-                if (currentScreen === 'createProfileScreen') {
-                    showProfileList();
-                } else if (currentScreen === 'profileDetailScreen') {
-                    showProfileList();
-                } else if (currentScreen === 'addAttackFunctionScreen' || currentScreen === 'addDiceFunctionScreen' || currentScreen === 'addSimpleDiceScreen') {
-                    showProfileDetail();
-                }
+                navigateBackOr(() => showProfileList(true));
             });
 
             document.getElementById('settingsBtn').addEventListener('click', toggleSettings);
@@ -1102,7 +1232,7 @@
             // Profile creation
             document.getElementById('createNewProfileBtn').addEventListener('click', showCreateProfile);
             document.getElementById('createProfileBtn').addEventListener('click', createProfile);
-            document.getElementById('cancelCreateProfileBtn').addEventListener('click', showProfileList);
+            document.getElementById('cancelCreateProfileBtn').addEventListener('click', () => navigateBackOr(() => showProfileList(true)));
 
             // Settings panel
             document.getElementById('addAttackFunctionBtn').addEventListener('click', showAddAttackFunction);
@@ -1112,13 +1242,13 @@
 
             // Dice function creation
             document.getElementById('saveAttackFunctionBtn').addEventListener('click', addAttackFunction);
-            document.getElementById('cancelAttackFunctionBtn').addEventListener('click', showProfileDetail);
+            document.getElementById('cancelAttackFunctionBtn').addEventListener('click', () => navigateBackOr(() => showProfileDetail(true)));
             document.getElementById('saveDiceFunctionBtn').addEventListener('click', addDiceFunction);
-            document.getElementById('cancelDiceFunctionBtn').addEventListener('click', showProfileDetail);
+            document.getElementById('cancelDiceFunctionBtn').addEventListener('click', () => navigateBackOr(() => showProfileDetail(true)));
 
             // Simple dice creation
             document.getElementById('saveSimpleDiceBtn').addEventListener('click', addSimpleDice);
-            document.getElementById('cancelSimpleDiceBtn').addEventListener('click', showProfileDetail);
+            document.getElementById('cancelSimpleDiceBtn').addEventListener('click', () => navigateBackOr(() => showProfileDetail(true)));
             document.getElementById('diceType').addEventListener('change', (e) => {
                 const custom = document.getElementById('customDiceSides');
                 if (e.target.value === 'custom') {
@@ -1135,7 +1265,8 @@
         // Initialize App
         initializeApp();
         initializeEventListeners();
-        showProfileList();
+        showProfileList(true);
+        initializeHistory();
     </script>
 </body>
 </html>
