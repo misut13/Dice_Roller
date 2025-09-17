@@ -493,9 +493,11 @@
         let profiles = [];
         let currentProfile = null;
         let lastRoll = null;
+        let isLastRollVisible = false;
         let deleteMode = false;
         const historyBaseUrl = window.location.pathname + window.location.search;
         let isNavigatingThroughHistory = false;
+        let resultHistoryActive = false;
 
         function pushHistoryState(view, data = {}) {
             if (!window.history || !history.pushState || isNavigatingThroughHistory) {
@@ -513,7 +515,25 @@
             history.replaceState(state, '', historyBaseUrl);
         }
 
+        function hideLastRollResult({ triggeredByHistory = false } = {}) {
+            const bar = document.getElementById('lastRollBar');
+            const isBarVisible = !!(bar && bar.style.display !== 'none');
+            if (!isBarVisible && !resultHistoryActive) {
+                return false;
+            }
+            const hadHistoryEntry = resultHistoryActive;
+            isLastRollVisible = false;
+            updateLastRollBar();
+            if (hadHistoryEntry && !triggeredByHistory && window.history && typeof history.back === 'function') {
+                history.back();
+            }
+            return isBarVisible || hadHistoryEntry;
+        }
+
         function navigateBackOr(fallback) {
+            if (hideLastRollResult()) {
+                return;
+            }
             const hasHistorySupport = window.history && typeof history.back === 'function';
             const hasAppState = !!(hasHistorySupport && history.state && history.state.view);
             if (hasHistorySupport && hasAppState) {
@@ -758,10 +778,19 @@
         function handleHistoryNavigation(event) {
             const state = event.state || {};
             const view = state.view;
+            if (view === 'profileDetail' && resultHistoryActive) {
+                hideLastRollResult({ triggeredByHistory: true });
+                return;
+            }
             isNavigatingThroughHistory = true;
             switch (view) {
                 case 'createProfile':
                     showCreateProfile(true);
+                    break;
+                case 'profileDetailResult':
+                    isLastRollVisible = true;
+                    resultHistoryActive = true;
+                    showProfileDetail(true, state.profileId || (currentProfile && currentProfile.id) || null);
                     break;
                 case 'profileDetail':
                     showProfileDetail(true, state.profileId || null);
@@ -864,6 +893,7 @@
         function openProfile(profileId) {
             currentProfile = profiles.find(p => p.id === profileId);
             lastRoll = null;
+            isLastRollVisible = false;
             showProfileDetail();
         }
 
@@ -901,6 +931,7 @@
                                 e.preventDefault();
                                 currentProfile.attackFunctions.splice(index, 1);
                                 lastRoll = null;
+                                isLastRollVisible = false;
                                 setDeleteModeState(false);
                                 saveProfiles();
                                 renderProfileDetail();
@@ -929,6 +960,7 @@
                                 e.preventDefault();
                                 currentProfile.diceFunctions.splice(index, 1);
                                 lastRoll = null;
+                                isLastRollVisible = false;
                                 setDeleteModeState(false);
                                 saveProfiles();
                                 renderProfileDetail();
@@ -959,6 +991,7 @@
                             e.preventDefault();
                             currentProfile.simpleDices.splice(index, 1);
                             lastRoll = null;
+                            isLastRollVisible = false;
                             setDeleteModeState(false);
                             saveProfiles();
                             renderProfileDetail();
@@ -977,8 +1010,10 @@
         function updateLastRollBar() {
             const bar = document.getElementById('lastRollBar');
             const text = document.getElementById('lastRollText');
-            const active = document.querySelector('.screen.active').id;
-            if (active === 'profileDetailScreen' && lastRoll) {
+            const activeScreen = document.querySelector('.screen.active');
+            const shouldShow = !!(activeScreen && activeScreen.id === 'profileDetailScreen' && lastRoll && isLastRollVisible);
+
+            if (shouldShow) {
                 bar.style.display = 'flex';
                 if (lastRoll.isAttack) {
                     text.innerHTML = `
@@ -992,8 +1027,17 @@
                         <div class="roll-result">${escapeHtml(lastRoll.details)} = <strong>${lastRoll.result}</strong></div>
                     `.trim();
                 }
+
+                if (!resultHistoryActive) {
+                    const profileId = currentProfile ? currentProfile.id : (history.state && history.state.profileId) || null;
+                    if (!isNavigatingThroughHistory) {
+                        pushHistoryState('profileDetailResult', { profileId });
+                    }
+                    resultHistoryActive = true;
+                }
             } else {
                 bar.style.display = 'none';
+                resultHistoryActive = false;
             }
         }
 
@@ -1024,6 +1068,7 @@
             currentProfile.attackFunctions.push({ name, attack, damage });
             saveProfiles();
             lastRoll = null;
+            isLastRollVisible = false;
             navigateBackOr(() => showProfileDetail(true));
         }
 
@@ -1052,6 +1097,7 @@
             currentProfile.diceFunctions.push({ name, formula });
             saveProfiles();
             lastRoll = null;
+            isLastRollVisible = false;
             navigateBackOr(() => showProfileDetail(true));
         }
 
@@ -1071,6 +1117,7 @@
             currentProfile.simpleDices.push({ sides });
             saveProfiles();
             lastRoll = null;
+            isLastRollVisible = false;
             navigateBackOr(() => showProfileDetail(true));
         }
 
@@ -1149,6 +1196,7 @@
                 details: result.detail,
                 result: result.total
             };
+            isLastRollVisible = true;
             playRandomSound(multiDiceSoundFiles);
             updateLastRollBar();
         }
@@ -1169,6 +1217,7 @@
                 attack: { details: attack.detail, result: attack.total },
                 damage: { details: damage.detail, result: damage.total }
             };
+            isLastRollVisible = true;
             playRandomSound(multiDiceSoundFiles);
             updateLastRollBar();
         }
@@ -1182,6 +1231,7 @@
                 details: `1w${dice.sides}`,
                 result: result
             };
+            isLastRollVisible = true;
             playRandomSound(diceSoundFiles);
             updateLastRollBar();
         }
@@ -1258,7 +1308,7 @@
                 }
             });
             document.getElementById('closeResultBtn').addEventListener('click', () => {
-                document.getElementById('lastRollBar').style.display = 'none';
+                hideLastRollResult();
             });
         }
 
