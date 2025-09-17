@@ -488,6 +488,11 @@
         let currentProfile = null;
         let lastRoll = null;
         let deleteMode = false;
+        let deletionCooldown = false;
+
+        function setDeleteModeState(isActive) {
+            deleteMode = isActive;
+        }
 
         const standardDiceSides = [3, 4, 6, 8, 10, 12, 20, 100];
         const diceSoundFiles = [
@@ -532,6 +537,7 @@
         // App initialisieren
         function initializeApp() {
             loadProfiles();
+            setDeleteModeState(false);
         }
 
         // Utility Functions
@@ -570,6 +576,7 @@
 
         function showProfileList() {
             showScreen('profileListScreen');
+            setDeleteModeState(false);
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'DiceForge';
             headerTitle.style.fontSize = '';
@@ -579,6 +586,7 @@
 
         function showCreateProfile() {
             showScreen('createProfileScreen');
+            setDeleteModeState(false);
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Neues Profil';
             headerTitle.style.fontSize = '';
@@ -588,7 +596,7 @@
 
         function showProfileDetail() {
             showScreen('profileDetailScreen');
-            deleteMode = false;
+            setDeleteModeState(false);
             if (currentProfile) {
                 const headerTitle = document.getElementById('headerTitle');
                 headerTitle.textContent = currentProfile.name;
@@ -601,6 +609,7 @@
 
         function showAddAttackFunction() {
             closeSettings();
+            setDeleteModeState(false);
             showScreen('addAttackFunctionScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Angriffsfunktion';
@@ -613,6 +622,7 @@
 
         function showAddDiceFunction() {
             closeSettings();
+            setDeleteModeState(false);
             showScreen('addDiceFunctionScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Würfelfunktion';
@@ -624,6 +634,7 @@
 
         function showAddSimpleDice() {
             closeSettings();
+            setDeleteModeState(false);
             showScreen('addSimpleDiceScreen');
             const headerTitle = document.getElementById('headerTitle');
             headerTitle.textContent = 'Einfacher Würfel';
@@ -743,9 +754,16 @@
                                 e.stopPropagation();
                                 e.preventDefault();
                                 currentProfile.attackFunctions.splice(index, 1);
-                                deleteMode = false;
                                 saveProfiles();
-                                renderProfileDetail();
+                                deletionCooldown = true;
+                                setDeleteModeState(false);
+                                setTimeout(() => {
+                                    renderProfileDetail();
+                                    deletionCooldown = false;
+                                }, 0);
+                                return;
+                            }
+                            if (deletionCooldown) {
                                 return;
                             }
                             rollAttackFunction(index);
@@ -770,9 +788,16 @@
                                 e.stopPropagation();
                                 e.preventDefault();
                                 currentProfile.diceFunctions.splice(index, 1);
-                                deleteMode = false;
                                 saveProfiles();
-                                renderProfileDetail();
+                                deletionCooldown = true;
+                                setDeleteModeState(false);
+                                setTimeout(() => {
+                                    renderProfileDetail();
+                                    deletionCooldown = false;
+                                }, 0);
+                                return;
+                            }
+                            if (deletionCooldown) {
                                 return;
                             }
                             rollDiceFunction(index);
@@ -799,9 +824,16 @@
                             e.stopPropagation();
                             e.preventDefault();
                             currentProfile.simpleDices.splice(index, 1);
-                            deleteMode = false;
                             saveProfiles();
-                            renderProfileDetail();
+                            deletionCooldown = true;
+                            setDeleteModeState(false);
+                            setTimeout(() => {
+                                renderProfileDetail();
+                                deletionCooldown = false;
+                            }, 0);
+                            return;
+                        }
+                        if (deletionCooldown) {
                             return;
                         }
                         rollSimpleDice(index);
@@ -1037,7 +1069,7 @@
             } else {
                 overlay.classList.add('active');
                 profileContent.classList.add('dimmed');
-                deleteMode = false;
+                setDeleteModeState(false);
             }
         }
 
@@ -1049,7 +1081,8 @@
         }
 
         function enableDeleteMode() {
-            deleteMode = true;
+            setDeleteModeState(true);
+            deletionCooldown = false;
             closeSettings();
         }
 
