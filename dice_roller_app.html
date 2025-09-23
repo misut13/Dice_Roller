@@ -227,6 +227,14 @@
             margin-bottom: 4px;
         }
 
+        .dice-function-name.dice-function-name--medium {
+            font-size: 14px;
+        }
+
+        .dice-function-name.dice-function-name--small {
+            font-size: 12px;
+        }
+
         .dice-function-formula {
             font-family: 'Courier New', monospace;
             color: black;
@@ -472,7 +480,7 @@
             <h2>Würfelfunktion hinzufügen</h2>
             <div class="input-group">
                 <label for="functionName">Name:</label>
-                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="18">
+                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="30">
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
@@ -509,7 +517,7 @@
             <h2><strong>Angriffsfunktion hinzufügen</strong></h2>
             <div class="input-group">
                 <label for="attackFunctionName">Name:</label>
-                <input type="text" id="attackFunctionName" placeholder="z.B. Schwerthieb" maxlength="18">
+                <input type="text" id="attackFunctionName" placeholder="z.B. Schwerthieb" maxlength="30">
             </div>
             <div class="input-group">
                 <label for="attackFunctionAttack">Angriffswurf:</label>
@@ -733,6 +741,20 @@
             const div = document.createElement('div');
             div.textContent = text.toString();
             return div.innerHTML;
+        }
+
+        function getDiceFunctionNameClasses(name) {
+            const value = typeof name === 'string' ? name : '';
+            const length = value.trim().length;
+            const classes = ['dice-function-name'];
+
+            if (length > 22) {
+                classes.push('dice-function-name--small');
+            } else if (length > 15) {
+                classes.push('dice-function-name--medium');
+            }
+
+            return classes.join(' ');
         }
 
         function generateId() {
@@ -1049,9 +1071,10 @@
                     currentProfile.attackFunctions.forEach((func, index) => {
                         const card = document.createElement('div');
                         card.className = 'dice-function-card';
-                        const name = escapeHtml(func.name.substring(0, 18));
+                        const nameClasses = getDiceFunctionNameClasses(func.name);
+                        const safeName = escapeHtml(func.name);
                         card.innerHTML = `
-                            <div class="dice-function-name">${name}</div>
+                            <div class="${nameClasses}">${safeName}</div>
                             <div class="dice-function-formula">A: ${escapeHtml(func.attack)} | S: ${escapeHtml(func.damage)}</div>
                         `;
 
@@ -1078,9 +1101,10 @@
                     currentProfile.diceFunctions.forEach((func, index) => {
                         const card = document.createElement('div');
                         card.className = 'dice-function-card';
-                        const name = escapeHtml(func.name.substring(0, 18));
+                        const nameClasses = getDiceFunctionNameClasses(func.name);
+                        const safeName = escapeHtml(func.name);
                         card.innerHTML = `
-                            <div class="dice-function-name">${name}</div>
+                            <div class="${nameClasses}">${safeName}</div>
                             <div class="dice-function-formula">${escapeHtml(func.formula)}</div>
                         `;
 
@@ -1173,16 +1197,16 @@
 
         // Dice Functions
         function addAttackFunction() {
-            const name = document.getElementById('attackFunctionName').value.trim().substring(0, 18);
+            const nameInput = document.getElementById('attackFunctionName').value.trim();
             const attack = document.getElementById('attackFunctionAttack').value.trim();
             const damage = document.getElementById('attackFunctionDamage').value.trim();
 
-            if (!name || !attack || !damage) {
+            if (!nameInput || !attack || !damage) {
                 alert('Bitte füllen Sie alle Felder aus.');
                 return;
             }
-            if (name.length > 18) {
-                alert('Der Name der Angriffsfunktion darf maximal 18 Zeichen lang sein.');
+            if (nameInput.length > 30) {
+                alert('Der Name der Angriffsfunktion darf maximal 30 Zeichen lang sein.');
                 return;
             }
             if (attack.length > 15 || damage.length > 15) {
@@ -1195,6 +1219,7 @@
                 return;
             }
 
+            const name = nameInput;
             currentProfile.attackFunctions.push({ name, attack, damage });
             saveProfiles();
             lastRoll = null;
@@ -1203,15 +1228,15 @@
         }
 
         function addDiceFunction() {
-            const name = document.getElementById('functionName').value.trim().substring(0, 18);
+            const nameInput = document.getElementById('functionName').value.trim();
             const formula = document.getElementById('functionFormula').value.trim();
 
-            if (!name || !formula) {
+            if (!nameInput || !formula) {
                 alert('Bitte füllen Sie alle Felder aus.');
                 return;
             }
-            if (name.length > 18) {
-                alert('Der Name der Würfelfunktion darf maximal 18 Zeichen lang sein.');
+            if (nameInput.length > 30) {
+                alert('Der Name der Würfelfunktion darf maximal 30 Zeichen lang sein.');
                 return;
             }
             if (formula.length > 15) {
@@ -1224,6 +1249,7 @@
                 return;
             }
 
+            const name = nameInput;
             currentProfile.diceFunctions.push({ name, formula });
             saveProfiles();
             lastRoll = null;
