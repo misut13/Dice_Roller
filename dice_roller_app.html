@@ -480,7 +480,7 @@
             <h2>Würfelfunktion hinzufügen</h2>
             <div class="input-group">
                 <label for="functionName">Name:</label>
-                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="25">
+                <input type="text" id="functionName" placeholder="z.B. Feuerball Schaden" maxlength="26">
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
@@ -517,7 +517,7 @@
             <h2><strong>Angriffsfunktion hinzufügen</strong></h2>
             <div class="input-group">
                 <label for="attackFunctionName">Name:</label>
-                <input type="text" id="attackFunctionName" placeholder="z.B. Schwerthieb" maxlength="25">
+                <input type="text" id="attackFunctionName" placeholder="z.B. Schwerthieb" maxlength="26">
             </div>
             <div class="input-group">
                 <label for="attackFunctionAttack">Angriffswurf:</label>
@@ -1205,8 +1205,8 @@
                 alert('Bitte füllen Sie alle Felder aus.');
                 return;
             }
-            if (nameInput.length > 25) {
-                alert('Der Name der Angriffsfunktion darf maximal 25 Zeichen lang sein.');
+            if (nameInput.length > 26) {
+                alert('Der Name der Angriffsfunktion darf maximal 26 Zeichen lang sein.');
                 return;
             }
             if (attack.length > 15 || damage.length > 15) {
@@ -1235,8 +1235,8 @@
                 alert('Bitte füllen Sie alle Felder aus.');
                 return;
             }
-            if (nameInput.length > 25) {
-                alert('Der Name der Würfelfunktion darf maximal 25 Zeichen lang sein.');
+            if (nameInput.length > 26) {
+                alert('Der Name der Würfelfunktion darf maximal 26 Zeichen lang sein.');
                 return;
             }
             if (formula.length > 15) {
