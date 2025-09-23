@@ -457,6 +457,7 @@
                     <button class="btn btn-wood" id="addAttackFunctionBtn"><strong>Angriffsfunktion hinzufügen</strong></button>
                     <button class="btn btn-wood" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
                     <button class="btn btn-wood" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
+                    <button class="btn btn-wood" id="toggleAnimationBtn" aria-pressed="true">Animation ausschalten</button>
                     <button class="btn btn-danger" id="deleteModeBtn">Löschen</button>
                 </div>
             </div>
@@ -541,6 +542,8 @@
         let isNavigatingThroughHistory = false;
         let resultHistoryActive = false;
         let diceAnimationHideTimeout = null;
+        const defaultAppSettings = { animationEnabled: true };
+        let appSettings = { ...defaultAppSettings };
 
         function pushHistoryState(view, data = {}) {
             if (!window.history || !history.pushState || isNavigatingThroughHistory) {
@@ -640,6 +643,10 @@
         }
 
         function showDiceAnimation() {
+            if (!appSettings.animationEnabled) {
+                hideDiceAnimation();
+                return;
+            }
             const overlay = document.getElementById('diceAnimationOverlay');
             const image = document.getElementById('diceAnimationImage');
             if (!overlay || !image) {
@@ -685,10 +692,35 @@
             }
         }
 
+        function saveAppSettings() {
+            try {
+                localStorage.setItem('appSettings', JSON.stringify(appSettings));
+            } catch (e) {
+                // Lokale Speicherung fehlgeschlagen, Einstellung wird nicht persistiert
+            }
+        }
+
+        function loadAppSettings() {
+            try {
+                const stored = localStorage.getItem('appSettings');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    appSettings = { ...defaultAppSettings, ...parsed };
+                } else {
+                    appSettings = { ...defaultAppSettings };
+                }
+            } catch (e) {
+                appSettings = { ...defaultAppSettings };
+            }
+            appSettings.animationEnabled = !!appSettings.animationEnabled;
+        }
+
         // App initialisieren
         function initializeApp() {
             loadProfiles();
+            loadAppSettings();
             setDeleteModeState(false);
+            updateSettingsUI();
         }
 
         // Utility Functions
@@ -1334,6 +1366,15 @@
         }
 
         // Settings
+        function updateSettingsUI() {
+            const animationBtn = document.getElementById('toggleAnimationBtn');
+            if (animationBtn) {
+                const isEnabled = !!appSettings.animationEnabled;
+                animationBtn.textContent = isEnabled ? 'Animation ausschalten' : 'Animation einschalten';
+                animationBtn.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
+            }
+        }
+
         function toggleSettings() {
             const overlay = document.getElementById('settingsOverlay');
             const profileContent = document.getElementById('profileContent');
@@ -1342,6 +1383,7 @@
                 overlay.classList.remove('active');
                 profileContent.classList.remove('dimmed');
             } else {
+                updateSettingsUI();
                 overlay.classList.add('active');
                 profileContent.classList.add('dimmed');
                 setDeleteModeState(false);
@@ -1358,6 +1400,15 @@
         function enableDeleteMode() {
             setDeleteModeState(true);
             closeSettings();
+        }
+
+        function toggleAnimationSetting() {
+            appSettings.animationEnabled = !appSettings.animationEnabled;
+            saveAppSettings();
+            if (!appSettings.animationEnabled) {
+                hideDiceAnimation();
+            }
+            updateSettingsUI();
         }
 
         // Initialize Event Listeners
@@ -1385,6 +1436,7 @@
             document.getElementById('addAttackFunctionBtn').addEventListener('click', () => showAddAttackFunction());
             document.getElementById('addDiceFunctionBtn').addEventListener('click', () => showAddDiceFunction());
             document.getElementById('addSimpleDiceBtn').addEventListener('click', () => showAddSimpleDice());
+            document.getElementById('toggleAnimationBtn').addEventListener('click', toggleAnimationSetting);
             document.getElementById('deleteModeBtn').addEventListener('click', enableDeleteMode);
 
             // Dice function creation
