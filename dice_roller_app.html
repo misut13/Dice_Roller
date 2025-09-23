@@ -386,6 +386,16 @@
         .dice-animation-container {
             width: 220px;
             height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dice-animation-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            pointer-events: none;
         }
 
         @media (min-width: 480px) {
@@ -508,7 +518,9 @@
             <button class="btn btn-secondary" id="cancelAttackFunctionBtn">Abbrechen</button>
         </div>
         <div id="diceAnimationOverlay" class="dice-animation-overlay" aria-hidden="true">
-            <div id="diceAnimationContainer" class="dice-animation-container"></div>
+            <div class="dice-animation-container">
+                <img id="diceAnimationImage" class="dice-animation-image" src="" alt="Würfel Animation">
+            </div>
         </div>
         <div id="lastRollBar" class="result-popup" style="display:none;">
             <div class="popup-content">
@@ -518,7 +530,6 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <script>
         // Global State
         let profiles = [];
@@ -529,7 +540,6 @@
         const historyBaseUrl = window.location.pathname + window.location.search;
         let isNavigatingThroughHistory = false;
         let resultHistoryActive = false;
-        let diceAnimationInstance = null;
         let diceAnimationHideTimeout = null;
 
         function pushHistoryState(view, data = {}) {
@@ -611,62 +621,28 @@
             audio.play().catch(() => {});
         }
 
-        function ensureDiceAnimation() {
-            if (diceAnimationInstance || !window.lottie) {
-                return;
-            }
-            const container = document.getElementById('diceAnimationContainer');
-            if (!container) {
-                return;
-            }
-            diceAnimationInstance = lottie.loadAnimation({
-                container,
-                renderer: 'svg',
-                loop: false,
-                autoplay: false,
-                path: 'dice.json',
-                rendererSettings: {
-                    preserveAspectRatio: 'xMidYMid meet'
-                }
-            });
-            diceAnimationInstance.addEventListener('complete', () => {
-                hideDiceAnimation();
-            });
-            diceAnimationInstance.addEventListener('data_failed', () => {
-                hideDiceAnimation();
-                diceAnimationInstance = null;
-            });
-        }
-
         function hideDiceAnimation() {
             if (diceAnimationHideTimeout) {
                 clearTimeout(diceAnimationHideTimeout);
                 diceAnimationHideTimeout = null;
-            }
-            if (diceAnimationInstance && typeof diceAnimationInstance.stop === 'function') {
-                diceAnimationInstance.stop();
-                if (typeof diceAnimationInstance.goToAndStop === 'function') {
-                    diceAnimationInstance.goToAndStop(0, true);
-                }
             }
             const overlay = document.getElementById('diceAnimationOverlay');
             if (overlay) {
                 overlay.classList.remove('active');
                 overlay.setAttribute('aria-hidden', 'true');
             }
+            const image = document.getElementById('diceAnimationImage');
+            if (image) {
+                image.onload = null;
+                image.onerror = null;
+                image.src = '';
+            }
         }
 
         function showDiceAnimation() {
             const overlay = document.getElementById('diceAnimationOverlay');
-            if (!overlay || !window.lottie) {
-                return;
-            }
-
-            ensureDiceAnimation();
-
-            if (!diceAnimationInstance) {
-                overlay.classList.remove('active');
-                overlay.setAttribute('aria-hidden', 'true');
+            const image = document.getElementById('diceAnimationImage');
+            if (!overlay || !image) {
                 return;
             }
 
@@ -676,27 +652,23 @@
             if (diceAnimationHideTimeout) {
                 clearTimeout(diceAnimationHideTimeout);
             }
-
-            if (typeof diceAnimationInstance.goToAndStop === 'function') {
-                diceAnimationInstance.goToAndStop(0, true);
-            } else if (typeof diceAnimationInstance.stop === 'function') {
-                diceAnimationInstance.stop();
-            }
-            if (typeof diceAnimationInstance.play === 'function') {
-                diceAnimationInstance.play();
-            }
-
-            let hideDelay = 4000;
-            if (typeof diceAnimationInstance.getDuration === 'function') {
-                const duration = diceAnimationInstance.getDuration(false);
-                if (duration && isFinite(duration)) {
-                    hideDelay = Math.max(1500, duration * 1000 + 200);
+            const hideDelay = 2000;
+            image.onload = () => {
+                image.onload = null;
+                image.onerror = null;
+                if (diceAnimationHideTimeout) {
+                    clearTimeout(diceAnimationHideTimeout);
                 }
-            }
-
-            diceAnimationHideTimeout = setTimeout(() => {
+                diceAnimationHideTimeout = setTimeout(() => {
+                    hideDiceAnimation();
+                }, hideDelay);
+            };
+            image.onerror = () => {
+                image.onload = null;
+                image.onerror = null;
                 hideDiceAnimation();
-            }, hideDelay);
+            };
+            image.src = `dice.gif?${Date.now()}`;
         }
 
         // Persistenz über Local Storage
