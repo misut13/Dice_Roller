@@ -290,6 +290,89 @@
             max-width: 300px;
         }
 
+        .settings-option {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            color: #2d3748;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+        }
+
+        .settings-option-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .settings-option-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .settings-option-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .settings-option-description {
+            font-size: 12px;
+            color: #4a5568;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-switch .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5f5;
+            transition: background-color 0.2s ease;
+            border-radius: 999px;
+        }
+
+        .toggle-switch .slider::before {
+            content: '';
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 2px;
+            top: 2px;
+            background-color: #ffffff;
+            transition: transform 0.2s ease;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        .toggle-switch input:checked + .slider::before {
+            transform: translateX(22px);
+        }
+
+        .toggle-switch input:focus-visible + .slider {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.4);
+        }
+
         #profileContent {
             display: flex;
             gap: 16px;
@@ -386,6 +469,16 @@
         .dice-animation-container {
             width: 220px;
             height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dice-animation-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            pointer-events: none;
         }
 
         @media (min-width: 480px) {
@@ -444,6 +537,18 @@
 
             <div id="settingsOverlay" class="settings-overlay">
                 <div class="settings-panel">
+                    <div class="settings-option">
+                        <div class="settings-option-row">
+                            <label class="settings-option-text" for="animationToggle">
+                                <span class="settings-option-title">Würfelanimation</span>
+                                <span class="settings-option-description">Animation beim Würfeln anzeigen</span>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="animationToggle">
+                                <span class="slider" aria-hidden="true"></span>
+                            </label>
+                        </div>
+                    </div>
                     <button class="btn btn-wood" id="addAttackFunctionBtn"><strong>Angriffsfunktion hinzufügen</strong></button>
                     <button class="btn btn-wood" id="addDiceFunctionBtn">Würfelfunktion hinzufügen</button>
                     <button class="btn btn-wood" id="addSimpleDiceBtn">Einfachen Würfel hinzufügen</button>
@@ -508,7 +613,9 @@
             <button class="btn btn-secondary" id="cancelAttackFunctionBtn">Abbrechen</button>
         </div>
         <div id="diceAnimationOverlay" class="dice-animation-overlay" aria-hidden="true">
-            <div id="diceAnimationContainer" class="dice-animation-container"></div>
+            <div class="dice-animation-container">
+                <img id="diceAnimationImage" class="dice-animation-image" src="" alt="Würfel Animation">
+            </div>
         </div>
         <div id="lastRollBar" class="result-popup" style="display:none;">
             <div class="popup-content">
@@ -518,9 +625,9 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <script>
         // Global State
+        const SETTINGS_STORAGE_KEY = 'diceAppSettings';
         let profiles = [];
         let currentProfile = null;
         let lastRoll = null;
@@ -529,8 +636,10 @@
         const historyBaseUrl = window.location.pathname + window.location.search;
         let isNavigatingThroughHistory = false;
         let resultHistoryActive = false;
-        let diceAnimationInstance = null;
         let diceAnimationHideTimeout = null;
+        let appSettings = {
+            animationEnabled: true
+        };
 
         function pushHistoryState(view, data = {}) {
             if (!window.history || !history.pushState || isNavigatingThroughHistory) {
@@ -611,62 +720,32 @@
             audio.play().catch(() => {});
         }
 
-        function ensureDiceAnimation() {
-            if (diceAnimationInstance || !window.lottie) {
-                return;
-            }
-            const container = document.getElementById('diceAnimationContainer');
-            if (!container) {
-                return;
-            }
-            diceAnimationInstance = lottie.loadAnimation({
-                container,
-                renderer: 'svg',
-                loop: false,
-                autoplay: false,
-                path: 'dice.json',
-                rendererSettings: {
-                    preserveAspectRatio: 'xMidYMid meet'
-                }
-            });
-            diceAnimationInstance.addEventListener('complete', () => {
-                hideDiceAnimation();
-            });
-            diceAnimationInstance.addEventListener('data_failed', () => {
-                hideDiceAnimation();
-                diceAnimationInstance = null;
-            });
-        }
-
         function hideDiceAnimation() {
             if (diceAnimationHideTimeout) {
                 clearTimeout(diceAnimationHideTimeout);
                 diceAnimationHideTimeout = null;
-            }
-            if (diceAnimationInstance && typeof diceAnimationInstance.stop === 'function') {
-                diceAnimationInstance.stop();
-                if (typeof diceAnimationInstance.goToAndStop === 'function') {
-                    diceAnimationInstance.goToAndStop(0, true);
-                }
             }
             const overlay = document.getElementById('diceAnimationOverlay');
             if (overlay) {
                 overlay.classList.remove('active');
                 overlay.setAttribute('aria-hidden', 'true');
             }
+            const image = document.getElementById('diceAnimationImage');
+            if (image) {
+                image.onload = null;
+                image.onerror = null;
+                image.src = '';
+            }
         }
 
         function showDiceAnimation() {
-            const overlay = document.getElementById('diceAnimationOverlay');
-            if (!overlay || !window.lottie) {
+            if (!appSettings.animationEnabled) {
+                hideDiceAnimation();
                 return;
             }
-
-            ensureDiceAnimation();
-
-            if (!diceAnimationInstance) {
-                overlay.classList.remove('active');
-                overlay.setAttribute('aria-hidden', 'true');
+            const overlay = document.getElementById('diceAnimationOverlay');
+            const image = document.getElementById('diceAnimationImage');
+            if (!overlay || !image) {
                 return;
             }
 
@@ -676,32 +755,32 @@
             if (diceAnimationHideTimeout) {
                 clearTimeout(diceAnimationHideTimeout);
             }
-
-            if (typeof diceAnimationInstance.goToAndStop === 'function') {
-                diceAnimationInstance.goToAndStop(0, true);
-            } else if (typeof diceAnimationInstance.stop === 'function') {
-                diceAnimationInstance.stop();
-            }
-            if (typeof diceAnimationInstance.play === 'function') {
-                diceAnimationInstance.play();
-            }
-
-            let hideDelay = 4000;
-            if (typeof diceAnimationInstance.getDuration === 'function') {
-                const duration = diceAnimationInstance.getDuration(false);
-                if (duration && isFinite(duration)) {
-                    hideDelay = Math.max(1500, duration * 1000 + 200);
+            const hideDelay = 2000;
+            image.onload = () => {
+                image.onload = null;
+                image.onerror = null;
+                if (diceAnimationHideTimeout) {
+                    clearTimeout(diceAnimationHideTimeout);
                 }
-            }
-
-            diceAnimationHideTimeout = setTimeout(() => {
+                diceAnimationHideTimeout = setTimeout(() => {
+                    hideDiceAnimation();
+                }, hideDelay);
+            };
+            image.onerror = () => {
+                image.onload = null;
+                image.onerror = null;
                 hideDiceAnimation();
-            }, hideDelay);
+            };
+            image.src = `dice.gif?${Date.now()}`;
         }
 
         // Persistenz über Local Storage
         function saveProfiles() {
             localStorage.setItem('profiles', JSON.stringify(profiles));
+        }
+
+        function saveSettings() {
+            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appSettings));
         }
 
         function loadProfiles() {
@@ -713,9 +792,34 @@
             }
         }
 
+        function loadSettings() {
+            try {
+                const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (typeof parsed.animationEnabled === 'boolean') {
+                        appSettings.animationEnabled = parsed.animationEnabled;
+                    }
+                }
+            } catch (e) {
+                appSettings.animationEnabled = true;
+            }
+        }
+
+        function applySettingsToUI() {
+            const toggle = document.getElementById('animationToggle');
+            if (toggle) {
+                toggle.checked = !!appSettings.animationEnabled;
+                if (!appSettings.animationEnabled) {
+                    hideDiceAnimation();
+                }
+            }
+        }
+
         // App initialisieren
         function initializeApp() {
             loadProfiles();
+            loadSettings();
             setDeleteModeState(false);
         }
 
@@ -1373,6 +1477,7 @@
                 overlay.classList.add('active');
                 profileContent.classList.add('dimmed');
                 setDeleteModeState(false);
+                applySettingsToUI();
             }
         }
 
@@ -1410,6 +1515,16 @@
             document.getElementById('cancelCreateProfileBtn').addEventListener('click', () => navigateBackOr(() => showProfileList(true)));
 
             // Settings panel
+            const animationToggle = document.getElementById('animationToggle');
+            if (animationToggle) {
+                animationToggle.addEventListener('change', (e) => {
+                    appSettings.animationEnabled = e.target.checked;
+                    saveSettings();
+                    if (!appSettings.animationEnabled) {
+                        hideDiceAnimation();
+                    }
+                });
+            }
             document.getElementById('addAttackFunctionBtn').addEventListener('click', () => showAddAttackFunction());
             document.getElementById('addDiceFunctionBtn').addEventListener('click', () => showAddDiceFunction());
             document.getElementById('addSimpleDiceBtn').addEventListener('click', () => showAddSimpleDice());
@@ -1440,6 +1555,7 @@
         // Initialize App
         initializeApp();
         initializeEventListeners();
+        applySettingsToUI();
         showProfileList(true);
         initializeHistory();
     </script>
