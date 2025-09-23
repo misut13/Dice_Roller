@@ -367,6 +367,33 @@
             margin-top: 20px;
             margin-bottom: 0;
         }
+
+        .dice-animation-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.15);
+            z-index: 1500;
+            pointer-events: none;
+        }
+
+        .dice-animation-overlay.active {
+            display: flex;
+        }
+
+        .dice-animation-container {
+            width: 220px;
+            height: 220px;
+        }
+
+        @media (min-width: 480px) {
+            .dice-animation-container {
+                width: 260px;
+                height: 260px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -480,6 +507,9 @@
             <button class="btn btn-secondary" id="saveAttackFunctionBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelAttackFunctionBtn">Abbrechen</button>
         </div>
+        <div id="diceAnimationOverlay" class="dice-animation-overlay" aria-hidden="true">
+            <div id="diceAnimationContainer" class="dice-animation-container"></div>
+        </div>
         <div id="lastRollBar" class="result-popup" style="display:none;">
             <div class="popup-content">
                 <div id="lastRollText"></div>
@@ -488,6 +518,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <script>
         // Global State
         let profiles = [];
@@ -498,6 +529,8 @@
         const historyBaseUrl = window.location.pathname + window.location.search;
         let isNavigatingThroughHistory = false;
         let resultHistoryActive = false;
+        let diceAnimationInstance = null;
+        let diceAnimationHideTimeout = null;
 
         function pushHistoryState(view, data = {}) {
             if (!window.history || !history.pushState || isNavigatingThroughHistory) {
@@ -516,6 +549,7 @@
         }
 
         function hideLastRollResult({ triggeredByHistory = false } = {}) {
+            hideDiceAnimation();
             const bar = document.getElementById('lastRollBar');
             const isBarVisible = !!(bar && bar.style.display !== 'none');
             if (!isBarVisible && !resultHistoryActive) {
@@ -575,6 +609,94 @@
             const source = soundFiles[Math.floor(Math.random() * soundFiles.length)];
             const audio = new Audio(source);
             audio.play().catch(() => {});
+        }
+
+        function ensureDiceAnimation() {
+            if (diceAnimationInstance || !window.lottie) {
+                return;
+            }
+            const container = document.getElementById('diceAnimationContainer');
+            if (!container) {
+                return;
+            }
+            diceAnimationInstance = lottie.loadAnimation({
+                container,
+                renderer: 'svg',
+                loop: false,
+                autoplay: false,
+                path: 'dice.json',
+                rendererSettings: {
+                    preserveAspectRatio: 'xMidYMid meet'
+                }
+            });
+            diceAnimationInstance.addEventListener('complete', () => {
+                hideDiceAnimation();
+            });
+            diceAnimationInstance.addEventListener('data_failed', () => {
+                hideDiceAnimation();
+                diceAnimationInstance = null;
+            });
+        }
+
+        function hideDiceAnimation() {
+            if (diceAnimationHideTimeout) {
+                clearTimeout(diceAnimationHideTimeout);
+                diceAnimationHideTimeout = null;
+            }
+            if (diceAnimationInstance && typeof diceAnimationInstance.stop === 'function') {
+                diceAnimationInstance.stop();
+                if (typeof diceAnimationInstance.goToAndStop === 'function') {
+                    diceAnimationInstance.goToAndStop(0, true);
+                }
+            }
+            const overlay = document.getElementById('diceAnimationOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                overlay.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        function showDiceAnimation() {
+            const overlay = document.getElementById('diceAnimationOverlay');
+            if (!overlay || !window.lottie) {
+                return;
+            }
+
+            ensureDiceAnimation();
+
+            if (!diceAnimationInstance) {
+                overlay.classList.remove('active');
+                overlay.setAttribute('aria-hidden', 'true');
+                return;
+            }
+
+            overlay.classList.add('active');
+            overlay.setAttribute('aria-hidden', 'false');
+
+            if (diceAnimationHideTimeout) {
+                clearTimeout(diceAnimationHideTimeout);
+            }
+
+            if (typeof diceAnimationInstance.goToAndStop === 'function') {
+                diceAnimationInstance.goToAndStop(0, true);
+            } else if (typeof diceAnimationInstance.stop === 'function') {
+                diceAnimationInstance.stop();
+            }
+            if (typeof diceAnimationInstance.play === 'function') {
+                diceAnimationInstance.play();
+            }
+
+            let hideDelay = 4000;
+            if (typeof diceAnimationInstance.getDuration === 'function') {
+                const duration = diceAnimationInstance.getDuration(false);
+                if (duration && isFinite(duration)) {
+                    hideDelay = Math.max(1500, duration * 1000 + 200);
+                }
+            }
+
+            diceAnimationHideTimeout = setTimeout(() => {
+                hideDiceAnimation();
+            }, hideDelay);
         }
 
         // Persistenz über Local Storage
@@ -1197,6 +1319,7 @@
                 result: result.total
             };
             isLastRollVisible = true;
+            showDiceAnimation();
             playRandomSound(multiDiceSoundFiles);
             updateLastRollBar();
         }
@@ -1218,6 +1341,7 @@
                 damage: { details: damage.detail, result: damage.total }
             };
             isLastRollVisible = true;
+            showDiceAnimation();
             playRandomSound(multiDiceSoundFiles);
             updateLastRollBar();
         }
@@ -1232,6 +1356,7 @@
                 result: result
             };
             isLastRollVisible = true;
+            showDiceAnimation();
             playRandomSound(diceSoundFiles);
             updateLastRollBar();
         }
