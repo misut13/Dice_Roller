@@ -519,6 +519,7 @@
     </div>
 
     <script src="./lottie.min.js"></script>
+    <script src="./dice_animation_data.js"></script>
     <script>
         // Global State
         let profiles = [];
@@ -531,6 +532,9 @@
         let resultHistoryActive = false;
         let diceAnimationInstance = null;
         let diceAnimationHideTimeout = null;
+        const diceAnimationData = (typeof window !== 'undefined' && window.DICE_ANIMATION_DATA)
+            ? window.DICE_ANIMATION_DATA
+            : null;
 
         function pushHistoryState(view, data = {}) {
             if (!window.history || !history.pushState || isNavigatingThroughHistory) {
@@ -619,16 +623,23 @@
             if (!container) {
                 return;
             }
-            diceAnimationInstance = lottie.loadAnimation({
+            const animationConfig = {
                 container,
                 renderer: 'svg',
                 loop: false,
                 autoplay: false,
-                path: 'dice.json',
                 rendererSettings: {
                     preserveAspectRatio: 'xMidYMid meet'
                 }
-            });
+            };
+
+            if (diceAnimationData) {
+                animationConfig.animationData = diceAnimationData;
+            } else {
+                animationConfig.path = 'dice.json';
+            }
+
+            diceAnimationInstance = lottie.loadAnimation(animationConfig);
             diceAnimationInstance.addEventListener('complete', () => {
                 hideDiceAnimation();
             });
