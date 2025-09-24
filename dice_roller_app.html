@@ -44,12 +44,12 @@
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 25px;
             margin-bottom: 5px;
         }
 
         .header .subtitle {
-            font-size: 14px;
+            font-size: 15px;
             opacity: 0.9;
         }
 
@@ -90,14 +90,14 @@
         }
 
         .profile-name {
-            font-size: 18px;
+            font-size: 19px;
             font-weight: bold;
             color: black;
             margin-bottom: 8px;
         }
 
         .profile-stats {
-            font-size: 12px;
+            font-size: 13px;
             color: black;
             display: flex;
             gap: 16px;
@@ -113,7 +113,7 @@
             border-radius: 50%;
             width: 24px;
             height: 24px;
-            font-size: 12px;
+            font-size: 13px;
             cursor: pointer;
             opacity: 0.7;
             transition: all 0.3s ease;
@@ -126,7 +126,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 500;
             transition: all 0.3s ease;
             width: 100%;
@@ -183,7 +183,7 @@
             padding: 12px;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 17px;
             transition: border-color 0.3s ease;
         }
 
@@ -222,24 +222,24 @@
         }
 
         .dice-function-name {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: bold;
             color: black;
             margin-bottom: 4px;
         }
 
         .dice-function-name.dice-function-name--medium {
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .dice-function-name.dice-function-name--small {
-            font-size: 10px;
+            font-size: 11px;
         }
 
         .dice-function-formula {
             font-family: 'Courier Prime', monospace;
             color: black;
-            font-size: 12px;
+            font-size: 13px;
             margin-bottom: 6px;
         }
 
@@ -254,7 +254,7 @@
             height: 40px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -267,7 +267,7 @@
 
         .settings-btn {
             right: 20px;
-            font-size: 20px;
+            font-size: 21px;
             font-weight: bold;
         }
 
@@ -336,7 +336,7 @@
         }
 
         .empty-state .icon {
-            font-size: 48px;
+            font-size: 49px;
             margin-bottom: 16px;
             opacity: 0.5;
         }
@@ -825,7 +825,7 @@
                 const headerTitle = document.getElementById('headerTitle');
                 headerTitle.textContent = currentProfile.name;
                 // Reduce oversized profile names by two font-size steps
-                headerTitle.style.fontSize = currentProfile.name.length > 14 ? '16px' : '';
+                headerTitle.style.fontSize = currentProfile.name.length > 14 ? '17px' : '';
                 document.getElementById('headerSubtitle').textContent = '';
                 renderProfileDetail();
                 if (!skipHistory) {
