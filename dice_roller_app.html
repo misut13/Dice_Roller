@@ -215,10 +215,15 @@
             justify-content: center;
         }
 
+        .dice-function-card .dice-function-name {
+            margin-top: 0.5em;
+        }
+
         .simple-dice-card .dice-function-name {
             margin-bottom: 0;
             width: 100%;
             text-align: center;
+            margin-top: 0;
         }
 
         .dice-function-name {
@@ -241,6 +246,31 @@
             color: black;
             font-size: 13px;
             margin-bottom: 6px;
+        }
+
+        .dice-function-formula--attack {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            column-gap: 6px;
+            row-gap: 2px;
+        }
+
+        .dice-function-formula--attack .dice-formula-part {
+            flex: 0 1 auto;
+        }
+
+        .dice-function-formula--attack .dice-formula-separator {
+            flex: 0 0 auto;
+        }
+
+        .dice-function-formula--attack.dice-function-formula--wrapped .dice-formula-separator {
+            display: none;
+        }
+
+        .dice-function-formula--attack.dice-function-formula--wrapped .dice-formula-part--damage {
+            flex-basis: 100%;
+            margin-top: 2px;
         }
 
         .back-btn, .settings-btn {
@@ -555,6 +585,7 @@
         let isNavigatingThroughHistory = false;
         let resultHistoryActive = false;
         let diceAnimationHideTimeout = null;
+        let attackFormulaLayoutFrame = null;
         const defaultAppSettings = { animationEnabled: true };
         let appSettings = { ...defaultAppSettings };
 
@@ -756,6 +787,42 @@
             }
 
             return classes.join(' ');
+        }
+
+        function updateAttackFormulaLayouts(rootElement) {
+            const scope = rootElement && typeof rootElement.querySelectorAll === 'function'
+                ? rootElement
+                : document;
+            const formulas = scope.querySelectorAll('.dice-function-formula--attack');
+
+            formulas.forEach(formula => {
+                const attackPart = formula.querySelector('.dice-formula-part--attack');
+                const damagePart = formula.querySelector('.dice-formula-part--damage');
+
+                if (!attackPart || !damagePart) {
+                    return;
+                }
+
+                formula.classList.remove('dice-function-formula--wrapped');
+
+                const attackTop = attackPart.offsetTop;
+                const damageTop = damagePart.offsetTop;
+
+                if ((damageTop - attackTop) > 1) {
+                    formula.classList.add('dice-function-formula--wrapped');
+                }
+            });
+        }
+
+        function scheduleAttackFormulaLayoutUpdate(rootElement) {
+            if (attackFormulaLayoutFrame !== null) {
+                cancelAnimationFrame(attackFormulaLayoutFrame);
+            }
+
+            attackFormulaLayoutFrame = requestAnimationFrame(() => {
+                attackFormulaLayoutFrame = null;
+                updateAttackFormulaLayouts(rootElement);
+            });
         }
 
         function generateId() {
@@ -1064,6 +1131,7 @@
             // Angriffsfunktionen und Würfelfunktionen
             const hasAttackFunctions = currentProfile.attackFunctions && currentProfile.attackFunctions.length > 0;
             const hasDiceFunctions = currentProfile.diceFunctions && currentProfile.diceFunctions.length > 0;
+            let shouldUpdateAttackLayouts = false;
 
             if (!hasAttackFunctions && !hasDiceFunctions) {
                 attackFunctionsList.innerHTML = '<p style="color: #718096; font-style: italic;">Es sind keine Funktionen definiert</p>';
@@ -1076,7 +1144,11 @@
                         const safeName = escapeHtml(func.name);
                         card.innerHTML = `
                             <div class="${nameClasses}">${safeName}</div>
-                            <div class="dice-function-formula">A: ${escapeHtml(func.attack)} | S: ${escapeHtml(func.damage)}</div>
+                            <div class="dice-function-formula dice-function-formula--attack">
+                                <span class="dice-formula-part dice-formula-part--attack">A: ${escapeHtml(func.attack)}</span>
+                                <span class="dice-formula-separator">|</span>
+                                <span class="dice-formula-part dice-formula-part--damage">S: ${escapeHtml(func.damage)}</span>
+                            </div>
                         `;
 
                         card.addEventListener('click', (e) => {
@@ -1095,6 +1167,7 @@
                         });
 
                         attackFunctionsList.appendChild(card);
+                        shouldUpdateAttackLayouts = true;
                     });
                 }
 
@@ -1127,6 +1200,10 @@
                         diceFunctionsList.appendChild(card);
                     });
                 }
+            }
+
+            if (shouldUpdateAttackLayouts) {
+                scheduleAttackFormulaLayoutUpdate(attackFunctionsList);
             }
 
             // Einfache Würfel
@@ -1510,6 +1587,10 @@
             });
             document.getElementById('closeResultBtn').addEventListener('click', () => {
                 hideLastRollResult();
+            });
+
+            window.addEventListener('resize', () => {
+                scheduleAttackFormulaLayoutUpdate();
             });
         }
 
