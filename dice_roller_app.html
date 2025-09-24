@@ -222,18 +222,18 @@
         }
 
         .dice-function-name {
-            font-size: 17px;
+            font-size: 19px;
             font-weight: bold;
             color: black;
             margin-bottom: 4px;
         }
 
         .dice-function-name.dice-function-name--medium {
-            font-size: 15px;
+            font-size: 17px;
         }
 
         .dice-function-name.dice-function-name--small {
-            font-size: 11px;
+            font-size: 13px;
         }
 
         .dice-function-formula {
@@ -446,7 +446,7 @@
             <h2>Neues Profil erstellen</h2>
             <div class="input-group">
                 <label for="profileName">Profilname:</label>
-                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="20">
+                <input type="text" id="profileName" placeholder="z.B. Gandalf der Graue" maxlength="24">
             </div>
             <button class="btn btn-secondary" id="createProfileBtn">Profil erstellen</button>
             <button class="btn btn-secondary" id="cancelCreateProfileBtn">Abbrechen</button>
@@ -508,7 +508,7 @@
                     <option value="100">W100</option>
                     <option value="custom">Individueller Würfel</option>
                 </select>
-                <input type="number" id="customDiceSides" placeholder="Seitenanzahl" style="display:none;" min="1">
+                <input type="text" id="customDiceSides" placeholder="Seitenanzahl" style="display:none;" inputmode="numeric" pattern="\\d*" maxlength="6">
             </div>
             <button class="btn btn-secondary" id="saveSimpleDiceBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelSimpleDiceBtn">Abbrechen</button>
@@ -1025,8 +1025,8 @@
                 alert('Bitte geben Sie einen Profilnamen ein.');
                 return;
             }
-            if (name.length > 20) {
-                alert('Profilname darf maximal 20 Zeichen lang sein.');
+            if (name.length > 24) {
+                alert('Profilname darf maximal 24 Zeichen lang sein.');
                 return;
             }
 
@@ -1263,7 +1263,21 @@
             const type = document.getElementById('diceType').value;
             let sides;
             if (type === 'custom') {
-                sides = parseInt(document.getElementById('customDiceSides').value, 10);
+                const customInput = document.getElementById('customDiceSides');
+                const rawValue = customInput.value.trim();
+                if (!rawValue) {
+                    alert('Bitte geben Sie eine gültige Seitenanzahl ein');
+                    return;
+                }
+                if (rawValue.length > 6) {
+                    alert('Die Seitenanzahl darf maximal 6 Zeichen lang sein.');
+                    return;
+                }
+                if (!/^\d+$/.test(rawValue)) {
+                    alert('Bitte geben Sie nur Ziffern für die Seitenanzahl ein.');
+                    return;
+                }
+                sides = parseInt(rawValue, 10);
             } else {
                 sides = parseInt(type, 10);
             }
@@ -1486,6 +1500,13 @@
                 } else {
                     custom.style.display = 'none';
                 }
+            });
+            document.getElementById('customDiceSides').addEventListener('input', (e) => {
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                if (value.length > 6) {
+                    value = value.slice(0, 6);
+                }
+                e.target.value = value;
             });
             document.getElementById('closeResultBtn').addEventListener('click', () => {
                 hideLastRollResult();
