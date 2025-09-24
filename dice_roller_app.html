@@ -41,6 +41,12 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            position: relative;
+        }
+
+        .header.header--profile {
+            background: url('Profile_header.png') no-repeat center;
+            background-size: 100% 100%;
         }
 
         .header h1 {
@@ -275,30 +281,23 @@
 
         .back-btn, .settings-btn {
             position: absolute;
-            top: 20px;
-            background: url('Button5.png') no-repeat center;
-            background-size: cover;
-            color: black;
+            top: 0;
+            background: none;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
+            width: 83px;
+            height: 83px;
             cursor: pointer;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 0;
+            opacity: 0;
+            z-index: 1;
         }
 
         .back-btn {
-            left: 20px;
+            left: 0;
         }
 
         .settings-btn {
-            right: 20px;
-            font-size: 21px;
-            font-weight: bold;
+            right: 0;
         }
 
         .settings-overlay {
@@ -453,8 +452,8 @@
     <div class="app-container">
         <!-- Header -->
         <div class="header">
-            <button class="back-btn" id="backBtn" style="display: none;">↩</button>
-            <button class="settings-btn" id="settingsBtn" style="display: none;">⛭</button>
+            <button class="back-btn" id="backBtn" style="display: none;" aria-label="Zurück"></button>
+            <button class="settings-btn" id="settingsBtn" style="display: none;" aria-label="Einstellungen"></button>
             <h1 id="headerTitle">DiceForge</h1>
             <div class="subtitle" id="headerSubtitle"></div>
         </div>
@@ -835,9 +834,13 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
-            
+
             const backBtn = document.getElementById('backBtn');
             const settingsBtn = document.getElementById('settingsBtn');
+            const header = document.querySelector('.header');
+            if (header) {
+                header.classList.toggle('header--profile', screenId === 'profileDetailScreen');
+            }
             if (screenId === 'profileListScreen') {
                 backBtn.style.display = 'none';
                 settingsBtn.style.display = 'none';
