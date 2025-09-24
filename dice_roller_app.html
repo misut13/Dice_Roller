@@ -515,7 +515,7 @@
             </div>
             <div class="input-group">
                 <label for="functionFormula">Formel:</label>
-                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3" maxlength="15">
+                <input type="text" id="functionFormula" placeholder="z.B. 3w6+3" maxlength="20">
                 <small>Format: Kombinationen wie 3w6+3 oder 3w6+3+2w6-2</small>
             </div>
             <button class="btn btn-secondary" id="saveDiceFunctionBtn">Hinzufügen</button>
@@ -538,7 +538,7 @@
                     <option value="100">W100</option>
                     <option value="custom">Individueller Würfel</option>
                 </select>
-                <input type="text" id="customDiceSides" placeholder="Seitenanzahl" style="display:none;" inputmode="numeric" pattern="\\d*" maxlength="6">
+                <input type="text" id="customDiceSides" placeholder="Seitenanzahl" style="display:none;" inputmode="numeric" pattern="\\d*" maxlength="5">
             </div>
             <button class="btn btn-secondary" id="saveSimpleDiceBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelSimpleDiceBtn">Abbrechen</button>
@@ -552,11 +552,11 @@
             </div>
             <div class="input-group">
                 <label for="attackFunctionAttack">Angriffswurf:</label>
-                <input type="text" id="attackFunctionAttack" placeholder="z.B. 1w20+5" maxlength="15">
+                <input type="text" id="attackFunctionAttack" placeholder="z.B. 1w20+5" maxlength="20">
             </div>
             <div class="input-group">
                 <label for="attackFunctionDamage">Schadenswurf:</label>
-                <input type="text" id="attackFunctionDamage" placeholder="z.B. 2w4+1" maxlength="15">
+                <input type="text" id="attackFunctionDamage" placeholder="z.B. 2w4+1" maxlength="20">
             </div>
             <button class="btn btn-secondary" id="saveAttackFunctionBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelAttackFunctionBtn">Abbrechen</button>
@@ -1287,8 +1287,8 @@
                 alert('Der Name der Angriffsfunktion darf maximal 26 Zeichen lang sein.');
                 return;
             }
-            if (attack.length > 15 || damage.length > 15) {
-                alert('Die Würfelformel darf maximal 15 Zeichen lang sein.');
+            if (attack.length > 20 || damage.length > 20) {
+                alert('Die Würfelformel darf maximal 20 Zeichen lang sein.');
                 return;
             }
 
@@ -1317,8 +1317,8 @@
                 alert('Der Name der Würfelfunktion darf maximal 26 Zeichen lang sein.');
                 return;
             }
-            if (formula.length > 15) {
-                alert('Die Würfelformel darf maximal 15 Zeichen lang sein.');
+            if (formula.length > 20) {
+                alert('Die Würfelformel darf maximal 20 Zeichen lang sein.');
                 return;
             }
 
@@ -1346,8 +1346,8 @@
                     alert('Bitte geben Sie eine gültige Seitenanzahl ein');
                     return;
                 }
-                if (rawValue.length > 6) {
-                    alert('Die Seitenanzahl darf maximal 6 Zeichen lang sein.');
+                if (rawValue.length > 5) {
+                    alert('Die Seitenanzahl darf maximal 5 Zeichen lang sein.');
                     return;
                 }
                 if (!/^\d+$/.test(rawValue)) {
