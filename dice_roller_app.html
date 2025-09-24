@@ -44,12 +44,12 @@
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 25px;
             margin-bottom: 5px;
         }
 
         .header .subtitle {
-            font-size: 14px;
+            font-size: 15px;
             opacity: 0.9;
         }
 
@@ -90,14 +90,14 @@
         }
 
         .profile-name {
-            font-size: 18px;
+            font-size: 19px;
             font-weight: bold;
             color: black;
             margin-bottom: 8px;
         }
 
         .profile-stats {
-            font-size: 12px;
+            font-size: 13px;
             color: black;
             display: flex;
             gap: 16px;
@@ -113,7 +113,7 @@
             border-radius: 50%;
             width: 24px;
             height: 24px;
-            font-size: 12px;
+            font-size: 13px;
             cursor: pointer;
             opacity: 0.7;
             transition: all 0.3s ease;
@@ -126,7 +126,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 500;
             transition: all 0.3s ease;
             width: 100%;
@@ -183,7 +183,7 @@
             padding: 12px;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 17px;
             transition: border-color 0.3s ease;
         }
 
@@ -222,24 +222,24 @@
         }
 
         .dice-function-name {
-            font-size: 16px;
+            font-size: 19px;
             font-weight: bold;
             color: black;
             margin-bottom: 4px;
         }
 
         .dice-function-name.dice-function-name--medium {
-            font-size: 14px;
+            font-size: 17px;
         }
 
         .dice-function-name.dice-function-name--small {
-            font-size: 10px;
+            font-size: 13px;
         }
 
         .dice-function-formula {
             font-family: 'Courier Prime', monospace;
             color: black;
-            font-size: 12px;
+            font-size: 13px;
             margin-bottom: 6px;
         }
 
@@ -254,7 +254,7 @@
             height: 40px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -267,7 +267,7 @@
 
         .settings-btn {
             right: 20px;
-            font-size: 20px;
+            font-size: 21px;
             font-weight: bold;
         }
 
@@ -336,7 +336,7 @@
         }
 
         .empty-state .icon {
-            font-size: 48px;
+            font-size: 49px;
             margin-bottom: 16px;
             opacity: 0.5;
         }
@@ -508,7 +508,7 @@
                     <option value="100">W100</option>
                     <option value="custom">Individueller Würfel</option>
                 </select>
-                <input type="number" id="customDiceSides" placeholder="Seitenanzahl" style="display:none;" min="1">
+                <input type="text" id="customDiceSides" placeholder="Seitenanzahl" style="display:none;" inputmode="numeric" pattern="\\d*" maxlength="6">
             </div>
             <button class="btn btn-secondary" id="saveSimpleDiceBtn">Hinzufügen</button>
             <button class="btn btn-secondary" id="cancelSimpleDiceBtn">Abbrechen</button>
@@ -825,7 +825,7 @@
                 const headerTitle = document.getElementById('headerTitle');
                 headerTitle.textContent = currentProfile.name;
                 // Reduce oversized profile names by two font-size steps
-                headerTitle.style.fontSize = currentProfile.name.length > 14 ? '16px' : '';
+                headerTitle.style.fontSize = currentProfile.name.length > 14 ? '17px' : '';
                 document.getElementById('headerSubtitle').textContent = '';
                 renderProfileDetail();
                 if (!skipHistory) {
@@ -1261,9 +1261,23 @@
         // Simple Dice
         function addSimpleDice() {
             const type = document.getElementById('diceType').value;
+            const customInput = document.getElementById('customDiceSides');
             let sides;
             if (type === 'custom') {
-                sides = parseInt(document.getElementById('customDiceSides').value, 10);
+                const rawValue = (customInput.value || '').trim();
+                if (!rawValue) {
+                    alert('Bitte geben Sie eine Seitenanzahl ein.');
+                    return;
+                }
+                if (rawValue.length > 6) {
+                    alert('Individuelle Würfel dürfen maximal 6 Zeichen enthalten.');
+                    return;
+                }
+                if (!/^\d+$/.test(rawValue)) {
+                    alert('Bitte verwenden Sie nur Ziffern für die Seitenanzahl.');
+                    return;
+                }
+                sides = parseInt(rawValue, 10);
             } else {
                 sides = parseInt(type, 10);
             }
@@ -1479,12 +1493,17 @@
             // Simple dice creation
             document.getElementById('saveSimpleDiceBtn').addEventListener('click', addSimpleDice);
             document.getElementById('cancelSimpleDiceBtn').addEventListener('click', () => navigateBackOr(() => showProfileDetail(true)));
+            const customDiceInput = document.getElementById('customDiceSides');
+            customDiceInput.addEventListener('input', () => {
+                const sanitizedValue = customDiceInput.value.replace(/\D/g, '').slice(0, 6);
+                customDiceInput.value = sanitizedValue;
+            });
             document.getElementById('diceType').addEventListener('change', (e) => {
-                const custom = document.getElementById('customDiceSides');
                 if (e.target.value === 'custom') {
-                    custom.style.display = 'block';
+                    customDiceInput.style.display = 'block';
                 } else {
-                    custom.style.display = 'none';
+                    customDiceInput.style.display = 'none';
+                    customDiceInput.value = '';
                 }
             });
             document.getElementById('closeResultBtn').addEventListener('click', () => {
